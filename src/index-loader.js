@@ -211,3 +211,119 @@ export {
   getSiteComponentsForSsr,
   applyGlobalComponentsSsr
 } from './components/global-components.js';
+
+// ============= Settings Helper (NEW) =============
+export {
+  clearSettingsCache,
+  getSetting,
+  getSettings,
+  saveSetting,
+  deleteSetting,
+  getSettingOrDefault
+} from './utils/settings-helper.js';
+
+// ============= Database Helper (NEW) =============
+export {
+  queryOne,
+  queryAll,
+  runQuery,
+  countRows,
+  exists,
+  insertRow,
+  updateRow,
+  deleteRow,
+  upsertRow,
+  batchInsert,
+  getTableColumns,
+  tableExists,
+  createTable
+} from './utils/db-helpers.js';
+
+// ============= Cache Keys (NEW) =============
+export {
+  buildVersionedCacheKey,
+  buildCacheKey,
+  parseCacheVersion,
+  shouldServeFromCache,
+  getFromCache,
+  setToCache,
+  deleteFromCache,
+  clearCache,
+  getCacheControlForFile
+} from './utils/cache-keys.js';
+
+// ============= Error Handler (NEW) =============
+export {
+  handleError,
+  logError,
+  safeAsync,
+  tryCatch,
+  tryCatchSync,
+  isError,
+  getErrorMessage,
+  isNetworkError,
+  isAuthError,
+  isNotFoundError,
+  isValidationError,
+  AppError,
+  ValidationError,
+  NotFoundError,
+  AuthError,
+  ForbiddenError,
+  NetworkError,
+  withErrorHandler,
+  createErrorHandler
+} from './utils/error-handler.js';
+
+// ============= Order Decoder (NEW) =============
+export {
+  decodeOrderData,
+  getEmptyOrderData,
+  parseOrderEncryptedData,
+  encodeOrderData,
+  extractBuyerInfo,
+  extractBuyerEmail,
+  extractBuyerName,
+  hasBuyerEmail,
+  getOrderAddons,
+  getOrderMessage,
+  formatOrderDataForDisplay
+} from './utils/order-decoder.js';
+
+// ============= Enhanced Response Builder (NEW) =============
+export {
+  json,
+  cachedJson,
+  errorResponse,
+  successResponse,
+  html,
+  text,
+  notFoundResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  badRequestResponse,
+  redirectResponse,
+  fileResponse,
+  emptyResponse
+} from './utils/response.js';
+
+// ============= SSR Query Helpers (NEW) =============
+export {
+  queryProductsForComponentSsr,
+  queryBlogsForComponentSsr,
+  queryForumQuestionsForSsr,
+  queryReviewsForSsr,
+  queryHomepageProducts,
+  queryPublishedBlogs
+} from './ssr/query-helpers.js';
+
+// ============= Page Generators (NEW) =============
+export {
+  generateBlogPostHTML,
+  generateBlogCard
+} from './ssr/blog-page-generator.js';
+
+export {
+  generateForumQuestionHTML,
+  generateForumCard
+} from './ssr/forum-page-generator.js';
