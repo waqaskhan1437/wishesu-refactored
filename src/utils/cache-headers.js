@@ -41,3 +41,30 @@ export function apiCacheHeaders(maxAge = 30, sMaxAge = 60) {
     'Cache-Control': `public, max-age=${maxAge}, s-maxage=${sMaxAge}`
   };
 }
+
+export function buildVersionedCacheKey(req, accept = 'text/html') {
+  const url = req.url || '';
+  const u = new URL(url);
+  const version = String(req?.env?.VERSION || '1').trim() || '1';
+  
+  const acceptLower = String(accept || '').toLowerCase();
+  
+  if (acceptLower.includes('text/html')) {
+    return new Request(`${u.origin}${u.pathname}?__v=${version}`, {
+      method: 'GET',
+      headers: { 'Accept': 'text/html' }
+    });
+  }
+  
+  if (acceptLower.includes('application/json')) {
+    return new Request(`${u.origin}${u.pathname}?__v=${version}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+  }
+  
+  return new Request(`${u.origin}${u.pathname}?__v=${version}`, {
+    method: 'GET',
+    headers: { 'Accept': accept || '*/*' }
+  });
+}

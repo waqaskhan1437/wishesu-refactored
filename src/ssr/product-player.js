@@ -3,7 +3,8 @@
  * Product player shell rendering for SSR
  */
 
-import { escapeHtmlText, sanitizeProductDescriptionHtml, ALLOWED_PRODUCT_DESCRIPTION_TAGS } from '../utils/html-sanitizer.js';
+import { escapeHtmlText } from '../utils/html-entities.js';
+import { sanitizeProductDescriptionHtml, ALLOWED_PRODUCT_DESCRIPTION_TAGS } from '../utils/html-sanitizer.js';
 import { stripUrlQueryHash, normalizeGalleryForPlayerSsr } from '../utils/url-helpers.js';
 import { parseAddonGroupsForSsr, computeInitialDeliveryLabelForSsr, computeDeliveryBadgeForSsr } from './product-ssr.js';
 import { renderStarsForSsr } from '../utils/star-renderer.js';

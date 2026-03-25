@@ -60,3 +60,12 @@ export function stripHtml(html) {
     .replace(/&quot;/g, '"')
     .trim();
 }
+
+export function replaceLegacyBrandTokens(text, siteTitle) {
+  if (!text) return text;
+  const title = siteTitle || 'WishVideo';
+  return String(text)
+    .replace(/\{\{SITE_TITLE\}\}/gi, title)
+    .replace(/\{\{BRAND\}\}/gi, title)
+    .replace(/\{\{SITE_NAME\}\}/gi, title);
+}

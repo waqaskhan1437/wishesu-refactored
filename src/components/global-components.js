@@ -3,9 +3,9 @@
  * Global header/footer component injection for SSR
  */
 
-import { normalizeCanonicalPath } from './routing/path-aliases.js';
-import { initDB } from './config/db.js';
-import { safeJsonParse } from './utils/json-helpers.js';
+import { normalizeCanonicalPath } from '../routing/path-aliases.js';
+import { initDB } from '../config/db.js';
+import { safeJsonParse } from '../utils/json-helpers.js';
 
 const SITE_COMPONENTS_SSR_TTL_MS = 10 * 1000;
 const siteComponentsSsrCache = {

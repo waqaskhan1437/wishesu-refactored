@@ -50,7 +50,8 @@ import { renderAddonDataAttrsForSsr, renderSsrAddonField, renderSsrAddonsForm } 
 
 import { shouldServeCanonicalAliasDirectly, normalizeCanonicalPath, getCanonicalRedirectPath } from './routing/path-aliases.js';
 
-import { resolveFallbackSiteTitle, getSeoSettingsObject, resolveSiteTitle, applySiteTitleToHtml, replaceLegacyBrandTokens } from './seo/seo-helpers.js';
+import { resolveFallbackSiteTitle, getSeoSettingsObject, resolveSiteTitle, applySiteTitleToHtml } from './seo/seo-helpers.js';
+import { replaceLegacyBrandTokens } from './utils/html-entities.js';
 
 import { getSitemapMembershipSet, isCanonicalInSitemap } from './seo/sitemap-helpers.js';
 import { normalizeSeoBaseUrl } from './utils/hostname-helpers.js';
@@ -65,7 +66,8 @@ import { queryProductsForComponentSsr, queryBlogsForComponentSsr, queryForumQues
 
 import { applyComponentSsrToHtml } from './ssr/component-applier.js';
 
-import { formatBlogArchiveDate as fmtBlogDate, truncateText } from './utils/date-formatter.js';
+import { formatBlogArchiveDate as fmtBlogDate } from './utils/date-formatter.js';
+import { truncateText } from './utils/string-helpers.js';
 
 function renderBlogArchivePaginationSsr(pagination = {}) {
   const page = Math.max(1, parseInt(pagination?.page, 10) || 1);
