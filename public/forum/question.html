@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <title>Question - Forum</title>
+  <meta name="description" content="Community forum question and answers">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    .forum-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .forum-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    /* Question Card */
+    .question-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .question-title {
+      font-size: 1.5rem;
+      color: #1f2937;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .question-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .question-content {
+      color: #374151;
+      font-size: 1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    /* Replies Section */
+    .replies-section {
+      margin-bottom: 30px;
+    }
+
+    .replies-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .replies-header h2 {
+      font-size: 1.2rem;
+      color: #1f2937;
+    }
+
+    .replies-count {
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .reply-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border-left: 4px solid #10b981;
+    }
+
+    .reply-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .reply-author {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .reply-date {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .reply-content {
+      color: #4b5563;
+      line-height: 1.7;
+    }
+
+    .no-replies {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .pagination button {
+      padding: 10px 18px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .pagination button:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    .pagination button.active {
+      background: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Reply Form */
+    .reply-form-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .reply-form-card h3 {
+      font-size: 1.1rem;
+      color: #1f2937;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #10b981;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #059669;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      display: none;
+    }
+
+    .message.success {
+      background: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      display: block;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #6b7280;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .question-meta {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Load global components asynchronously -->
+  <script defer src="/js/global-components.js"></script>
+  <header class="forum-header">
+    <a href="/forum/" class="back-link">← Back to Forum</a>
+    <h1>💬 Community Forum</h1>
+  </header>
+
+  <div class="container">
+    <!-- Question -->
+    <div id="question-container">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading question...</p>
+      </div>
+    </div>
+
+    <!-- Replies -->
+    <div id="replies-container"></div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination"></div>
+
+    <!-- Reply Form -->
+    <div class="reply-form-card">
+      <h3>💬 Write a Reply</h3>
+      <div id="reply-message" class="message"></div>
+      <form id="reply-form">
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="r-name" placeholder="Your Name (max 50)" required maxlength="50">
+          </div>
+          <div class="form-group">
+            <input type="email" id="r-email" placeholder="Your Email (max 100)" required maxlength="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea id="r-content" placeholder="Write your reply (5-2000 chars)..." required minlength="5"
+            maxlength="2000"></textarea>
+          <div style="text-align:right;font-size:0.75rem;color:#6b7280;margin-top:2px"><span
+              id="reply-count">0</span>/2000</div>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Submit Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var questionId = null;
+    var questionData = null;
+    var currentPage = 1;
+    var totalPages = 1;
+    var repliesPerPage = 20;
+    var allReplies = [];
+
+    // Character counter for reply
+    document.getElementById('r-content').addEventListener('input', function () {
+      document.getElementById('reply-count').textContent = this.value.length;
+    });
+
+    // Get question ID from URL
+    const params = new URLSearchParams(window.location.search);
+    questionId = params.get('id');
+
+    if (!questionId) {
+      document.getElementById('question-container').innerHTML = '<div class="no-replies">Question not found. <a href="/forum/">Go back to forum</a></div>';
+    } else {
+      loadQuestion();
+    }
+
+    async function loadQuestion() {
+      try {
+        const res = await fetch('/api/forum/question-by-id?id=' + questionId);
+        const data = await res.json();
+
+        if (data.question) {
+          questionData = data.question;
+          document.title = data.question.title + ' - Forum';
+
+          const date = data.question.created_at ? new Date(data.question.created_at).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
+          }) : '';
+
+          document.getElementById('question-container').innerHTML = `
+            <div class="question-card">
+              <h1 class="question-title">${escapeHtml(data.question.title)}</h1>
+              <div class="question-meta">
+                <span>👤 ${escapeHtml(data.question.name)}</span>
+                <span>📅 ${date}</span>
+                <span>💬 ${data.question.reply_count || 0} replies</span>
+              </div>
+              <div class="question-content">${escapeHtml(data.question.content)}</div>
+            </div>
+          `;
+
+          loadReplies();
+        } else {
+          document.getElementById('question-container').innerHTML = '<div class="no-replies">Question not found. <a href="/forum/">Go back to forum</a></div>';
+        }
+      } catch (err) {
+        document.getElementById('question-container').innerHTML = '<div class="no-replies">Error loading question. <a href="/forum/">Go back to forum</a></div>';
+      }
+    }
+
+    async function loadReplies() {
+      const container = document.getElementById('replies-container');
+
+      try {
+        const res = await fetch('/api/forum/question-replies?question_id=' + questionId);
+        const data = await res.json();
+
+        allReplies = data.replies || [];
+        totalPages = Math.ceil(allReplies.length / repliesPerPage) || 1;
+
+        renderReplies();
+        renderPagination();
+      } catch (err) {
+        container.innerHTML = '<div class="no-replies">Error loading replies</div>';
+      }
+    }
+
+    function renderReplies() {
+      const container = document.getElementById('replies-container');
+      const start = (currentPage - 1) * repliesPerPage;
+      const end = start + repliesPerPage;
+      const pageReplies = allReplies.slice(start, end);
+
+      if (allReplies.length === 0) {
+        container.innerHTML = `
+          <div class="replies-section">
+            <div class="replies-header">
+              <h2>Replies</h2>
+              <span class="replies-count">0 replies</span>
+            </div>
+            <div class="no-replies">No replies yet. Be the first to reply!</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="replies-section">
+          <div class="replies-header">
+            <h2>Replies</h2>
+            <span class="replies-count">${allReplies.length} ${allReplies.length === 1 ? 'reply' : 'replies'}</span>
+          </div>
+          ${pageReplies.map(r => {
+        const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric'
+        }) : '';
+        return `
+              <div class="reply-card">
+                <div class="reply-header">
+                  <span class="reply-author">👤 ${escapeHtml(r.name)}</span>
+                  <span class="reply-date">${date}</span>
+                </div>
+                <div class="reply-content">${escapeHtml(r.content)}</div>
+              </div>
+            `;
+      }).join('')}
+        </div>
+      `;
+    }
+
+    function renderPagination() {
+      const pag = document.getElementById('pagination');
+
+      if (totalPages <= 1) {
+        pag.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      // Previous button
+      html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">← Prev</button>`;
+
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+          html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        } else if (Math.abs(i - currentPage) === 3) {
+          html += '<span style="padding:10px;">...</span>';
+        }
+      }
+
+      // Next button
+      html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Next →</button>`;
+
+      pag.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderReplies();
+      renderPagination();
+      // Scroll to replies section
+      document.getElementById('replies-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Reply Form Submit
+    document.getElementById('reply-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const msg = document.getElementById('reply-message');
+      const btn = document.getElementById('submit-btn');
+
+      const data = {
+        question_id: parseInt(questionId),
+        name: document.getElementById('r-name').value.trim(),
+        email: document.getElementById('r-email').value.trim(),
+        content: document.getElementById('r-content').value.trim()
+      };
+
+      if (!data.name || !data.email || !data.content) {
+        msg.textContent = 'Please fill all fields';
+        msg.className = 'message error';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch('/api/forum/submit-reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          msg.textContent = '✅ Reply submitted! It will appear after admin approval.';
+          msg.className = 'message success';
+          document.getElementById('r-content').value = '';
+        } else {
+          msg.textContent = result.error || 'Failed to submit reply';
+          msg.className = 'message error';
+        }
+      } catch (err) {
+        msg.textContent = 'Error submitting reply. Please try again.';
+        msg.className = 'message error';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Submit Reply';
+    });
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+
+</body>
+
+</html>

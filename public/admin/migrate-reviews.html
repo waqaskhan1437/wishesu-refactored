@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews Migration Utility - Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #1f2937;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .description {
+      color: #6b7280;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .section {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .section h2 {
+      color: #374151;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    .section p {
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+    }
+    .result.success {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+    .result.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .result.info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 24px;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Reviews Migration Utility</h1>
+    <p class="description">
+      This tool helps migrate old reviews that were created before the portfolio delivery system was fully implemented. 
+      It will automatically link review videos from their associated orders to ensure all reviews display properly on product pages.
+    </p>
+
+    <div class="section">
+      <h2>What This Does</h2>
+      <p>
+        When you click the migration button below, the system will search for all reviews that have an associated order ID but are missing video URL information. 
+        It will then copy the delivered video URL and thumbnail URL from the order table to the review table. This ensures that customer portfolio videos appear correctly with their reviews.
+      </p>
+      <p>
+        This process is safe to run multiple times as it only updates reviews that are missing video data. Reviews that already have video URLs will not be affected.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Migration Process</h2>
+      <button id="migrate-btn" onclick="migrateReviews()">Start Migration</button>
+      <div id="migrate-result" class="result"></div>
+    </div>
+
+    <div class="section">
+      <h2>System Status</h2>
+      <button id="check-btn" onclick="checkStatus()">Check Current Status</button>
+      <div id="status-result" class="result"></div>
+      <div id="stats" class="stats" style="display: none;"></div>
+    </div>
+
+    <a href="/admin/dashboard.html" class="back-link">← Back to Admin Dashboard</a>
+  </div>
+
+  <script>
+    async function migrateReviews() {
+      const btn = document.getElementById('migrate-btn');
+      const result = document.getElementById('migrate-result');
+      
+      btn.disabled = true;
+      btn.textContent = 'Migrating...';
+      result.style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/admin/reviews/migrate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          result.className = 'result success';
+          result.textContent = `✅ Success! Migrated ${data.rowsUpdated} reviews with video links from their orders.`;
+          result.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Migration failed');
+        }
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `❌ Error: ${error.message}`;
+        result.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Start Migration';
+      }
+    }
+
+    async function checkStatus() {
+      const btn = document.getElementById('check-btn');
+      const result = document.getElementById('status-result');
+      const statsDiv = document.getElementById('stats');
+      
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      result.style.display = 'none';
+      statsDiv.style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/admin/reviews/migrate/status');
+        const data = await response.json();
+        const stats = data.stats || {};
+        
+        const totalReviews = Number(stats.totalReviews || 0);
+        const reviewsWithVideos = Number(stats.reviewsWithVideos || 0);
+        const reviewsWithoutVideos = Number(stats.reviewsWithoutVideos || 0);
+        const reviewsWithOrders = Number(stats.reviewsWithOrders || 0);
+        const eligibleForMigration = Number(stats.eligibleForMigration || 0);
+        
+        result.className = 'result info';
+        result.textContent = `📊 System analysis complete. Found ${totalReviews} total reviews in the database.`;
+        result.style.display = 'block';
+        
+        statsDiv.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-number">${totalReviews}</div>
+            <div class="stat-label">Total Reviews</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${reviewsWithVideos}</div>
+            <div class="stat-label">With Video URLs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${reviewsWithoutVideos}</div>
+            <div class="stat-label">Missing Video URLs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${reviewsWithOrders}</div>
+            <div class="stat-label">Linked to Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${eligibleForMigration}</div>
+            <div class="stat-label">Can Be Migrated</div>
+          </div>
+        `;
+        statsDiv.style.display = 'grid';
+        
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `❌ Error checking status: ${error.message}`;
+        result.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Check Current Status';
+      }
+    }
+  </script>
+</body>
+</html>

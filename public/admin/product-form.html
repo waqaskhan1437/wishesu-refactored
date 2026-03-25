@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – Product Form</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Tab Navigation Styles */
+    .tabs-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .tabs-nav {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      background: #f9fafb;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .tab-button {
+      flex: 1;
+      min-width: 150px;
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .tab-button.active {
+      color: #4f46e5;
+      background: white;
+      border-bottom-color: #4f46e5;
+    }
+
+    .tab-icon {
+      font-size: 1.1rem;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 2.5rem;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Enhanced Form Styling */
+    .product-form-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .form-section-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+
+    .form-section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .form-section-desc {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .field-helper-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 0.4rem;
+      display: block;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-wrapper:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .checkbox-wrapper label {
+      margin: 0;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    /* Media Upload Sections */
+    .upload-group {
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.2s;
+    }
+
+    .upload-group:hover {
+      border-color: #4f46e5;
+      background: #faf9fe;
+    }
+
+    .upload-group legend {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #374151;
+      padding: 0 0.5rem;
+    }
+
+    .upload-divider {
+      text-align: center;
+      color: #9ca3af;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .gallery-row {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+    }
+
+    /* Addon Builder Styles */
+    #addons-fields {
+      margin-bottom: 1.5rem;
+    }
+
+    .addon-field-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+
+    .addon-field-card:hover {
+      border-color: #c7d2fe;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Addon Field Styling */
+    .addon-field {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+
+    .addon-field:hover {
+      border-color: #c7d2fe;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .addon-row-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .addon-row-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    .addon-row-main label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.95rem;
+      min-width: 200px;
+    }
+
+    .addon-row-main select,
+    .addon-row-main input {
+      padding: 0.5rem 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .addon-row-main select:focus,
+    .addon-row-main input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .addon-row-config {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .field-note {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin: 0;
+      font-style: italic;
+    }
+
+    .form-field {
+      margin-bottom: 1rem;
+    }
+
+    .form-field label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .addon-option-row {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .addon-option-main {
+      margin-bottom: 1rem;
+    }
+
+    .addon-option-flags {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .addon-option-flags label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .addon-option-config {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
+    }
+
+    .form-actions {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 1.5rem 2.5rem;
+      border-top: 2px solid #e5e7eb;
+      margin: 2rem -2.5rem -2.5rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .form-actions .btn-primary {
+      min-width: 200px;
+      justify-content: center;
+    }
+
+    /* Back Button Styling */
+    .admin-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4f46e5;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+      margin-bottom: 1.5rem;
+    }
+
+    .admin-back-btn:hover {
+      background: #eef2ff;
+      transform: translateX(-4px);
+    }
+
+    /* Header Styling */
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+      }
+
+      .tab-button {
+        min-width: 120px;
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .tab-content {
+        padding: 1.5rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions .btn-primary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="admin-page">
+  <div class="admin-shell product-form-wrapper">
+    <!-- Back Button -->
+    <a href="/admin/" class="admin-back-btn">
+      ← Back to Dashboard
+    </a>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>📝 Product Form</h1>
+      <p>Create and manage your products with organized sections for all details</p>
+    </div>
+
+    <!-- Tabs Container -->
+    <form id="product-form" class="admin-form">
+      <div class="tabs-container">
+        <!-- Tab Navigation -->
+        <div class="tabs-nav">
+          <button type="button" class="tab-button active" data-tab="basic">
+            <span class="tab-icon">📋</span>
+            <span>Basic Details</span>
+          </button>
+          <button type="button" class="tab-button" data-tab="media">
+            <span class="tab-icon">🖼️</span>
+            <span>Media</span>
+          </button>
+          <button type="button" class="tab-button" data-tab="addons">
+            <span class="tab-icon">⚙️</span>
+            <span>Custom Fields</span>
+          </button>
+          <button type="button" class="tab-button" data-tab="seo">
+            <span class="tab-icon">🔍</span>
+            <span>SEO Settings</span>
+          </button>
+          <button type="button" class="tab-button" data-tab="whop">
+            <span class="tab-icon">💳</span>
+            <span>Whop Integration</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Basic Details -->
+        <div class="tab-content active" id="tab-basic">
+          <div class="form-section-header">
+            <h2 class="form-section-title">Basic Product Information</h2>
+            <p class="form-section-desc">Set up the core details of your product</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="title">Product Title *</label>
+              <input type="text" id="title" name="title" required placeholder="e.g. Birthday Greeting Video">
+              <span class="field-helper-text">This will be the main product name displayed to customers</span>
+            </div>
+            <div class="form-group">
+              <label for="slug">URL Slug</label>
+              <input type="text" id="slug" name="slug" placeholder="auto-generated-from-title">
+              <span class="field-helper-text">Leave empty to auto-generate from title</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Product Description</label>
+            <textarea id="description" name="description" rows="4" placeholder="Describe your product in detail..."></textarea>
+            <span class="field-helper-text">Provide a clear and engaging description</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="normal_price">Normal Price ($) *</label>
+              <input type="number" id="normal_price" name="normal_price" step="0.01" placeholder="0.00">
+              <span class="field-helper-text">Regular price in USD</span>
+            </div>
+            <div class="form-group">
+              <label for="sale_price">Sale Price ($)</label>
+              <input type="number" id="sale_price" name="sale_price" step="0.01" placeholder="Optional sale price">
+              <span class="field-helper-text">Optional discounted price</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="instant_delivery" name="instant_delivery">
+                <label for="instant_delivery">⚡ Enable Instant Delivery (Automated)</label>
+              </div>
+              <span class="field-helper-text">Product will be delivered automatically after purchase</span>
+            </div>
+            <div class="form-group">
+              <label for="delivery_time_days">Delivery Time (Days)</label>
+              <input type="number" id="delivery_time_days" name="delivery_time_days" min="1" max="30" value="1" placeholder="e.g. 1, 2, 3">
+              <span class="field-helper-text">Number of days for delivery (default: 1 day)</span>
+            </div>
+          </div>
+          
+          <!-- Delivery Preview -->
+          <div class="form-row">
+            <div class="form-group" style="width: 100%;">
+              <label>📦 Delivery Badge Preview</label>
+              <div id="delivery-preview" style="padding: 12px 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 1.1em;">
+                Instant Delivery In 60 Minutes
+              </div>
+              <span class="field-helper-text">This is how delivery time will appear on product page</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Media -->
+        <div class="tab-content" id="tab-media">
+          <div class="form-section-header">
+            <h2 class="form-section-title">Product Media</h2>
+            <p class="form-section-desc">Upload images and videos to showcase your product</p>
+          </div>
+
+          <!-- Thumbnail -->
+          <fieldset class="upload-group">
+            <legend>📸 Thumbnail Image</legend>
+            <div class="form-group">
+              <label for="thumbnail_file">Upload Image</label>
+              <input type="file" id="thumbnail_file" name="thumbnail_file" accept="image/*">
+            </div>
+            <div class="upload-divider">OR</div>
+            <div class="form-group">
+              <label for="thumbnail_url">Image URL</label>
+              <input type="text" id="thumbnail_url" name="thumbnail_url" placeholder="https://example.com/thumb.jpg">
+            </div>
+          </fieldset>
+
+          <!-- Gallery -->
+          <fieldset class="upload-group" id="gallery-wrapper">
+            <legend>🖼️ Gallery Images</legend>
+            <div class="gallery-row">
+              <div class="form-group">
+                <label>Upload Image</label>
+                <input type="file" name="gallery_files[]" accept="image/*">
+              </div>
+              <div class="upload-divider">OR</div>
+              <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" name="gallery_urls[]" placeholder="https://example.com/image.jpg">
+              </div>
+            </div>
+            <button type="button" id="add-gallery-image" class="btn-secondary">+ Add More Images</button>
+          </fieldset>
+
+          <!-- Video -->
+          <fieldset class="upload-group">
+            <legend>🎥 Product Video</legend>
+            <div class="form-group">
+              <label for="video_file">Upload Video</label>
+              <input type="file" id="video_file" name="video_file" accept="video/*">
+            </div>
+            <div class="upload-divider">OR</div>
+            <div class="form-group">
+              <label for="video_url">Video URL</label>
+              <input type="text" id="video_url" name="video_url" placeholder="https://example.com/video.mp4">
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Tab 3: Custom Fields (Addons) -->
+        <div class="tab-content" id="tab-addons">
+          <div class="form-section-header">
+            <h2 class="form-section-title">Custom Fields (Addons)</h2>
+            <p class="form-section-desc">Create custom options like dropdowns, checkboxes, and file uploads for customers</p>
+          </div>
+
+          <div id="addons-builder">
+            <div id="addons-fields"></div>
+            <button type="button" id="add-addon-field" class="btn-primary">
+              <span>+</span>
+              <span>Add New Field</span>
+            </button>
+            <input type="hidden" name="addons_json" id="addons-json">
+          </div>
+        </div>
+
+        <!-- Tab 4: SEO Settings -->
+        <div class="tab-content" id="tab-seo">
+          <div class="form-section-header">
+            <h2 class="form-section-title">SEO Settings</h2>
+            <p class="form-section-desc">Optimize your product for search engines</p>
+          </div>
+
+          <div class="form-group">
+            <label for="seo_title">Meta Title</label>
+            <input type="text" id="seo_title" name="seo_title" maxlength="160" placeholder="SEO optimized title">
+            <span class="field-helper-text">Recommended: 50-60 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label for="seo_description">Meta Description</label>
+            <textarea id="seo_description" name="seo_description" rows="3" maxlength="320" placeholder="Brief description for search results"></textarea>
+            <span class="field-helper-text">Recommended: 150-160 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label for="seo_keywords">Focus Keywords</label>
+            <input type="text" id="seo_keywords" name="seo_keywords" placeholder="keyword1, keyword2, keyword3">
+            <span class="field-helper-text">Separate keywords with commas</span>
+          </div>
+
+          <div class="form-group">
+            <label for="seo_canonical">Canonical URL (Optional)</label>
+            <input type="text" id="seo_canonical" name="seo_canonical" placeholder="https://example.com/product">
+            <span class="field-helper-text">Specify the preferred URL for search engines</span>
+          </div>
+        </div>
+
+        <!-- Tab 5: Whop Integration -->
+        <div class="tab-content" id="tab-whop">
+          <div class="form-section-header">
+            <h2 class="form-section-title">💳 Whop Payment Integration</h2>
+            <p class="form-section-desc">Connect your product to Whop for payment processing</p>
+          </div>
+
+          <div class="form-group">
+            <label for="whop_product_id">Whop Product ID (Dynamic Checkout)</label>
+            <input type="text" id="whop_product_id" name="whop_product_id" placeholder="prod_XXXXXXXXX or Whop product URL">
+            <span class="field-helper-text">
+              Dynamic checkout pehle is product-specific value ko use karta hai.<br>
+              Is field se yeh product global gateway product ID ko override karega.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="whop_plan">Whop Product Link or Plan ID (Optional)</label>
+            <input type="text" id="whop_plan" name="whop_plan" placeholder="https://whop.com/your-product OR plan_XXXXXXXXX">
+            <span class="field-helper-text">
+              <strong>Option 1:</strong> Paste your Whop product link (e.g., https://whop.com/your-product)<br>
+              <strong>Option 2:</strong> Or just the Plan ID (e.g., plan_XXXXXXXXX)
+            </span>
+          </div>
+
+          <div style="background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0; color: #1e40af; font-size: 0.95rem;">
+              💡 <strong>Auto-checkout:</strong> A checkout session will be automatically created when the customer clicks "Checkout" and will auto-delete after payment or 15 minutes if unused.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="whop_price_map">Whop Price Map (Advanced)</label>
+            <textarea id="whop_price_map" name="whop_price_map" rows="3" placeholder="e.g. 5|plan_abc123,10|plan_def456"></textarea>
+            <span class="field-helper-text">
+              Optional: For products with multiple price tiers, map amounts to different plan IDs.<br>
+              Format: <code>amount|planId,amount|planId</code>
+            </span>
+          </div>
+        </div>
+
+        <!-- Form Actions (Sticky at bottom) -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            <span>💾</span>
+            <span>Save Product</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <!-- load addon builder modules (split into multiple smaller files) -->
+  <script src="../js/addons/data.js"></script>
+  <script src="../js/addons/utils.js"></script>
+  <script src="../js/addons/fields.js"></script>
+  <script src="../js/addons/config.js"></script>
+  <script src="../js/addons/builder.js"></script>
+  <!-- other logic -->
+  <script src="../js/product-seo.js"></script>
+  <script src="../js/product-form.js"></script>
+  
+  <!-- Tab Switching Logic -->
+  <script>
+    (function() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTab = button.getAttribute('data-tab');
+
+          // Remove active class from all buttons and contents
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+
+          // Add active class to clicked button and corresponding content
+          button.classList.add('active');
+          document.getElementById('tab-' + targetTab).classList.add('active');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

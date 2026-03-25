@@ -1,0 +1,25 @@
+{
+  "name": "cloudflare-ecommerce",
+  "version": "1.0.1",
+  "description": "Complete e-commerce solution with Whop integration and Google Sheets automation.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 5000 --ip 0.0.0.0",
+    "dev:local": "wrangler dev --local --port 5000 --ip 0.0.0.0",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "test": "node --test test/component-ssr.test.mjs test/forum-controller.test.mjs test/homepage-ssr.test.mjs test/reviews-migration.test.mjs test/routing-audit.test.mjs test/ssr-routes.test.mjs test/webhook-validation.test.mjs",
+    "test:ssr": "node --test test/component-ssr.test.mjs test/forum-controller.test.mjs test/homepage-ssr.test.mjs test/reviews-migration.test.mjs test/routing-audit.test.mjs test/ssr-routes.test.mjs test/webhook-validation.test.mjs",
+    "tail": "wrangler tail",
+    "d1:execute": "wrangler d1 execute",
+    "r2:list": "wrangler r2 bucket list"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "playwright-core": "^1.58.2",
+    "wrangler": "^4.54.0"
+  }
+}

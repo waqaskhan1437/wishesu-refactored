@@ -1,0 +1,1067 @@
+:root {
+  /* Updated colors for Accessibility (WCAG AA Contrast) */
+  --primary: #4f46e5;
+  /* Darker Indigo for better text contrast */
+  --primary-hover: #4338ca;
+  --success: #047857;
+  /* Darker Green for readable white text */
+  --text-main: #1f2937;
+  --text-muted: #4b5563;
+  /* Darkened from #6b7280 for better readability */
+  --bg-page: #f9fafb;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.site-nav a {
+  margin-left: 1.5rem;
+  text-decoration: none;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.site-nav a:hover {
+  color: var(--primary);
+}
+
+/* Main Layout */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  /* 8% Padding for more compact, centered look */
+  padding: 0 8% 4rem;
+}
+
+.breadcrumb {
+  margin-bottom: 1.5rem;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* --- PRODUCT PAGE LAYOUT --- */
+.product-page {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+/* Top Row: Media (Left) + Info (Right) - Fixed min-height to prevent CLS */
+.product-main-row {
+  display: grid;
+  grid-template-columns: 54% 46%;
+  gap: 2rem;
+  align-items: start;
+  min-height: 500px;
+  /* Reserve space */
+}
+
+/* Left Column: Media - CSS containment */
+.product-media-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem;
+  height: fit-content;
+  z-index: 10;
+  contain: layout style;
+}
+
+/* Right Column: Info & Form - CSS containment */
+.product-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  contain: layout style;
+}
+
+.product-desc-row {
+  width: 100%;
+}
+
+/* Video Player - Fixed dimensions to prevent CLS */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 350px;
+  /* Minimum height to prevent CLS */
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  contain: layout style paint;
+  /* CSS containment for performance */
+}
+
+.video-wrapper .plyr {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  background-size: contain !important;
+  display: block;
+}
+
+.video-wrapper img.main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-wrapper .plyr__poster {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background-size: contain !important;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.plyr__video-wrapper video {
+  object-fit: contain !important;
+}
+
+.video-wrapper {
+  --plyr-color-main: var(--primary);
+}
+
+/* Thumbnails - Fixed height to prevent CLS */
+.thumbnails {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 126, 234, 0.5) rgba(0, 0, 0, 0.1);
+  min-height: 116px;
+  /* Fixed height: 100px thumb + 8px padding top/bottom */
+  align-items: center;
+}
+
+/* Webkit scrollbar styling for thumbnail slider */
+.thumbnails::-webkit-scrollbar {
+  height: 6px;
+}
+
+.thumbnails::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.thumbnails::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 3px;
+}
+
+.thumbnails::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.8);
+}
+
+/* Accessibility: Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Accessibility: Focus visible styles for keyboard navigation */
+:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline when using mouse */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Touch target minimum size (48x48px for WCAG) */
+.addon-option-card {
+  min-height: 48px;
+}
+
+.btn-buy,
+.btn-book-now {
+  min-height: 48px;
+}
+
+/* Ensure interactive elements have sufficient touch target */
+.thumb {
+  min-height: 48px;
+}
+
+.thumb {
+  min-width: 140px;
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  background: #f3f4f6;
+  flex-shrink: 0;
+  /* Prevent shrinking */
+  aspect-ratio: 14/10;
+  /* Maintain aspect ratio */
+  contain: layout style;
+}
+
+.thumb:hover {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.thumb.active {
+  border-color: #667eea !important;
+}
+
+/* Info Panel Styling - Fixed min-height to prevent CLS */
+.product-info-panel {
+  background: #fff;
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  min-height: 400px;
+  /* Reserve space to prevent CLS */
+  contain: layout style;
+  /* CSS containment */
+}
+
+.product-title {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.5px;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stars {
+  color: #fbbf24;
+}
+
+.review-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.badges-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  min-height: 80px;
+}
+
+.badge-box {
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 70px;
+}
+
+.badge-delivery {
+  background-color: var(--success);
+}
+
+.badge-delivery .icon {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.badge-delivery #delivery-badge-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+/* Accessible Price Color (High Contrast) */
+.badge-price {
+  background-color: #5b21b6;
+  /* Dark Purple */
+}
+
+.price-final {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.price-original {
+  font-size: 0.9rem;
+  text-decoration: line-through;
+  opacity: 0.9;
+  margin-left: 5px;
+  color: #e5e7eb;
+  /* Light grey on dark bg */
+}
+
+.discount-tag {
+  font-size: 0.8rem;
+  background: #fff;
+  color: #5b21b6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.digital-note {
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  color: #065f46;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Addons */
+.addons-container {
+  margin-top: 1.5rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 1.5rem;
+}
+
+.addon-group {
+  margin-bottom: 1.5rem;
+}
+
+.addon-group-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.addon-option-card {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  background: #fff;
+  contain: layout style;
+}
+
+.addon-option-card:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.addon-option-card.selected {
+  border-color: var(--primary);
+  background: #eef2ff;
+}
+
+.addon-option-card input {
+  margin-right: 0.75rem;
+  transform: scale(1.2);
+}
+
+.opt-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.opt-price {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.btn-buy {
+  display: block;
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.btn-buy:hover {
+  background: var(--primary-hover);
+}
+
+/* Book Now Button - Collapsible Form Trigger */
+.btn-book-now {
+  /*
+   * Book Now buttons now use a high‑contrast golden colour scheme to aid
+   * visually impaired users.  We avoid relying on the default primary
+   * palette here so that the button remains clearly visible against
+   * varied page backgrounds.  A subtle gradient adds visual depth while
+   * maintaining sufficient contrast.  The text colour is set to black
+   * for maximum legibility on lighter golden tones (see
+   * https://webexpress.colorado.edu/article/531-color-contrast for
+   * guidance on gold/black contrast【353448574535686†L26-L34】).  When the form is expanded
+   * the button style is overridden inline in JavaScript to a darker
+   * golden variant but still retains the same accessible colour ratio.
+   */
+  display: block;
+  width: 100%;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  text-align: center;
+  /* Golden gradient for the idle state */
+  background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+  color: #000;
+  /* Subtle shadow to lift the button off the page */
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.btn-book-now:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-book-now:active {
+  transform: translateY(0);
+}
+
+/*
+ * Mobile Sticky Book Now Button
+ *
+ * On small screens, keep the "Book Now" button visible when the user
+ * scrolls down the product page.  We use position: sticky so that the
+ * button sticks to the bottom of its container (the right column) and
+ * remains in view.  This improves accessibility and makes it easier
+ * for mobile users to initiate a booking without having to scroll
+ * back up.
+ */
+@media (max-width: 600px) {
+  .product-info-col .btn-book-now {
+    position: sticky;
+    bottom: 1rem;
+    /* Ensure it appears above other content */
+    z-index: 20;
+  }
+
+  /* The mobile fullscreen overlay for the addons form has been removed.
+     We now leave the form inline on all screen sizes. */
+}
+
+/* The no-scroll rule used to prevent background scroll when the form
+   opened fullscreen on mobile.  Since that feature has been removed,
+   we no longer need this rule. */
+
+/* Addons Container Animation - GPU accelerated */
+#addons-container {
+  transition: max-height 0.4s ease-out, opacity 0.25s ease;
+  will-change: max-height, opacity;
+}
+
+#addons-container.expanded {
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  will-change: auto;
+}
+
+#addons-container.expanding {
+  max-height: 5000px !important;
+  opacity: 1 !important;
+}
+
+/* Description */
+.product-desc {
+  background: #fff;
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.product-desc h2,
+.product-desc h3 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.product-desc p {
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+/* Admin & Utils */
+.loading-state {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.admin-page {
+  padding: 2rem 1rem;
+  background: #f3f4f6;
+}
+
+.admin-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+}
+
+/*
+  Admin form styling improvements
+
+  The following rules provide a more polished and cohesive look for all admin
+  pages.  They apply increased padding, subtle shadows and consistent
+  typography to input elements.  Grid templates are responsive to
+  accommodate various screen sizes while maintaining readability.
+*/
+
+.admin-page .card-section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-page .form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.admin-page .form-field {
+  margin-bottom: 1rem;
+}
+
+.admin-page .form-field-inline label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.8rem;
+}
+
+.admin-page .field-group {
+  border: 1px solid var(--border);
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* make legend stand out */
+.admin-page .field-group legend {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.admin-page label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+/* Reusable button styles for admin pages */
+.btn {
+  display: inline-block;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.admin-page input[type="text"],
+.admin-page input[type="number"],
+.admin-page input[type="file"],
+.admin-page textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+}
+
+.admin-page input[type="file"] {
+  padding: 0.4rem 0.75rem;
+}
+
+.admin-page textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.admin-page .form-actions {
+  margin-top: 2rem;
+}
+
+
+@media (max-width: 900px) {
+
+  /* Reset padding for mobile - keep it smaller */
+  main {
+    padding: 0 4% 3rem;
+    max-width: 100%;
+  }
+
+  .product-main-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-height: auto;
+  }
+
+  .product-media-col {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .product-info-col {
+    width: 100%;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field-inline label {
+    margin-top: 0;
+  }
+
+  /* Thumbnail slider mobile optimization */
+  .thumbnails {
+    gap: 8px;
+    padding: 6px 0;
+    min-height: 97px;
+    /* 85px thumb + padding */
+  }
+
+  .thumb {
+    min-width: 120px;
+    width: 120px;
+    height: 85px;
+  }
+
+  .product-info-panel {
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    min-height: auto;
+  }
+
+  .product-title {
+    font-size: 1.75rem;
+  }
+}
+
+
+/* Mobile optimizations */
+@media screen and (max-width: 768px) {
+
+  /* Force 16:9 aspect ratio on mobile - remove max-height constraint */
+  .video-wrapper {
+    aspect-ratio: 16 / 9 !important;
+    min-height: auto;
+    max-height: none;
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  .video-wrapper video {
+    object-fit: contain !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none;
+    min-height: 200px;
+  }
+
+  .video-wrapper img.main-img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-facade {
+    aspect-ratio: 16 / 9 !important;
+    position: relative !important;
+  }
+
+  /* Main play button overlay on video */
+  .play-btn-overlay {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 70px !important;
+    height: 70px !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+  }
+
+  .play-btn-overlay svg {
+    width: 32px !important;
+    height: 32px !important;
+    margin-left: 4px;
+  }
+
+  /* Ensure video controls are visible on mobile - ONLY for player, NOT thumbnails */
+  #universal-player-container {
+    overflow: visible !important;
+    min-height: 250px !important;
+  }
+
+  #universal-player-container video {
+    min-height: 200px !important;
+  }
+
+  #universal-player-container video::-webkit-media-controls {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #universal-player-container video::-webkit-media-controls-panel {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #universal-player-container video::-webkit-media-controls-enclosure {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* HIDE controls on thumbnail videos in slider */
+  #thumbnails-slider video {
+    pointer-events: none !important;
+  }
+
+  #thumbnails-slider video::-webkit-media-controls,
+  #thumbnails-slider video::-webkit-media-controls-panel,
+  #thumbnails-slider video::-webkit-media-controls-enclosure,
+  #thumbnails-slider video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    -webkit-appearance: none !important;
+  }
+
+  /* Review section - Watch Video button below thumbnail on mobile */
+  .review-portfolio-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .review-portfolio-row>div:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16/9;
+  }
+
+  .review-portfolio-row>button {
+    width: 100% !important;
+    margin-top: 8px;
+  }
+}
+
+/* Fix for disappearing play button on hover */
+.plyr--video:hover .plyr__control--overlaid {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Video facade play button - main video area */
+.video-facade {
+  position: relative;
+  cursor: pointer;
+}
+
+.play-btn-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.video-facade:hover .play-btn-overlay {
+  background: rgba(79, 70, 229, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Thumb wrapper - ensure stacking context */
+.thumb-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+  z-index: 1;
+}
+
+/* Hide controls on thumbnail videos */
+#thumbnails-slider video {
+  pointer-events: none !important;
+}
+
+#thumbnails-slider video::-webkit-media-controls {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+#thumbnails-slider video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+#thumbnails-slider video::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+#thumbnails-slider video::-moz-media-controls {
+  display: none !important;
+}
+
+/* Keep play button visible on thumbnail hover - always visible */
+.thumb-play-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: background 0.2s ease;
+  z-index: 100 !important;
+  pointer-events: none;
+}
+
+.thumb-wrapper:hover .thumb-play-btn,
+.thumb-wrapper .thumb:hover~.thumb-play-btn,
+div:hover>.thumb-play-btn,
+div:hover .thumb-play-btn,
+*:hover>.thumb-play-btn,
+*:hover .thumb-play-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+  z-index: 100 !important;
+}
+
+/* Force play button visibility on thumbnail hover (main slider) */
+.thumb-wrapper:hover .thumb-play-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 200 !important;
+  display: flex !important;
+  pointer-events: none;
+}
+
+/* Ensure img transform doesn't hide play button */
+.thumb-wrapper .thumb {
+  position: relative;
+  z-index: 1;
+}
+
+.thumb-wrapper .thumb:hover {
+  z-index: 1;
+}

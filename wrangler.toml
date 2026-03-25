@@ -1,0 +1,57 @@
+name = "wishesu"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# Optional custom domains (uncomment + change to your domain)
+# routes = [
+#   { pattern = "example.com", custom_domain = true },
+#   { pattern = "www.example.com", custom_domain = true }
+# ]
+
+[assets]
+directory = "./public"
+# Expose the static asset directory as the `ASSETS` binding.  With a Worker
+# script present, Cloudflare still serves matching files automatically; however,
+# binding the directory allows our worker to explicitly fetch assets and modify
+# response headers when necessary.
+binding = "ASSETS"
+
+# Route every request through the Worker so the no-JS SSR layer can own all
+# HTML routes, legacy aliases, and dynamic DB-backed pages. Static assets still
+# exit quickly through the Worker fast-path in `src/index.js`.
+run_worker_first = ["/*"]
+
+# Serve the nearest 404.html for unknown paths that don't match a static
+# asset or Worker route.  Change to "single-page-application" if you have an SPA.
+not_found_handling = "404-page"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "secure-shop-db"
+# database_id = "CHANGE-ME" # set after: npx wrangler d1 create secure-shop-db
+
+[[r2_buckets]]
+binding = "PRODUCT_MEDIA"
+bucket_name = "product-media-bucket"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "temp-uploads-bucket"
+
+[triggers]
+# WARMING: Run every 5 minutes to keep worker and DB warm
+# This prevents cold start issues and connection reset errors
+# Moderate ping frequency to reduce background request volume
+# Also runs cleanup at 2 AM daily
+crons = ["*/5 * * * *", "0 2 * * *"]
+
+# Optional build-time variables.  You can update VERSION before each publish
+# to force Cloudflare to treat your worker and static assets as a new
+# deployment.  This value is also surfaced via the /api/debug endpoint and
+# attached to static asset responses via the X-Worker-Version header.  It can
+# help confirm that you are receiving the latest build.
+[vars]
+VERSION = "24"
+CANONICAL_HOST = "prankwish.com"
+ENABLE_NOJS_SSR = "false"

@@ -1,0 +1,63 @@
+# WishesU / Prankwish Cloudflare Worker Configuration
+#
+# 1) Copy this file to `wrangler.toml`
+# 2) Update the values marked "CHANGE ME"
+# 3) Create D1 + R2 resources (commands in DEPLOY.md)
+# 4) Set secrets via `wrangler secret put ...`
+
+name = "CHANGE-ME-worker-name"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# Optional: bind static assets (recommended)
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Route every request through the Worker when full server-side rendering is
+# enabled. Static assets are still short-circuited in `src/index.js`.
+run_worker_first = ["/*"]
+
+not_found_handling = "404-page"
+
+# Optional: Custom domain routes
+# routes = [
+#   { pattern = "CHANGE-ME.com", custom_domain = true },
+#   { pattern = "www.CHANGE-ME.com", custom_domain = true }
+# ]
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "CHANGE-ME-d1-name"
+# database_id = "CHANGE-ME"   # Add after `wrangler d1 create ...`
+
+# R2 buckets
+[[r2_buckets]]
+binding = "PRODUCT_MEDIA"
+bucket_name = "CHANGE-ME-product-media"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "CHANGE-ME-temp-uploads"
+
+# Cron triggers
+[triggers]
+# - */5 keeps the worker warm + reduces cold starts
+# - 0 2 runs daily cleanup tasks
+crons = ["*/5 * * * *", "0 2 * * *"]
+
+# Non-secret variables
+[vars]
+VERSION = "1"
+ENABLE_NOJS_SSR = "false"
+
+# Secrets (set with `wrangler secret put`)
+# - ADMIN_SESSION_SECRET
+# - ARCHIVE_ACCESS_KEY
+# - ARCHIVE_SECRET_KEY
+# - TURNSTILE_SECRET_KEY (optional)
+# - WHOP_API_KEY (if using Whop)
+# - BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME (if using Brevo emails)
+# - ORDER_ADMIN_EMAIL (optional)

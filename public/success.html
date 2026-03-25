@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <title>Order Confirmed | prankwish.com</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #102038;
+      --ink-soft: #4f5f78;
+      --line: #d6e3f4;
+      --surface: #ffffff;
+      --surface-soft: #f6faff;
+      --brand: #2563eb;
+      --brand-deep: #0f3ca8;
+      --teal: #0ea5a4;
+      --success: #10b981;
+      --success-soft: #e8fff5;
+      --warn-soft: #fff6e8;
+      --warn-ink: #9a5f14;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Manrope', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(800px 420px at 5% 0%, #dbeafe 0%, rgba(219, 234, 254, 0) 70%),
+        radial-gradient(700px 380px at 100% 10%, #ecfeff 0%, rgba(236, 254, 255, 0) 72%),
+        radial-gradient(700px 420px at 80% 100%, #fff7ed 0%, rgba(255, 247, 237, 0) 70%),
+        linear-gradient(160deg, #f8fbff 0%, #edf5ff 45%, #f6f9ff 100%);
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      z-index: -1;
+      filter: blur(8px);
+    }
+
+    body::before {
+      width: 320px;
+      height: 320px;
+      top: -120px;
+      right: -80px;
+      background: rgba(37, 99, 235, 0.14);
+    }
+
+    body::after {
+      width: 280px;
+      height: 280px;
+      bottom: -90px;
+      left: -90px;
+      background: rgba(14, 165, 164, 0.15);
+    }
+
+    .success-shell {
+      width: min(980px, 100%);
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      animation: shell-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .main-card,
+    .side-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(214, 227, 244, 0.95);
+      border-radius: 24px;
+      box-shadow: 0 28px 70px rgba(16, 32, 56, 0.12);
+      backdrop-filter: blur(8px);
+    }
+
+    .main-card {
+      padding: 30px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .side-card {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+
+    .pill.success {
+      background: var(--success-soft);
+      color: #0f8f63;
+      border-color: #b8f2dd;
+    }
+
+    .pill.gateway {
+      background: #eff6ff;
+      color: var(--brand-deep);
+      border-color: #bfdbfe;
+    }
+
+    .success-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(155deg, #14b8a6 0%, #059669 100%);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.3);
+      animation: pop 0.45s ease-out 0.15s both;
+      flex-shrink: 0;
+    }
+
+    .success-icon svg {
+      width: 34px;
+      height: 34px;
+      stroke: #fff;
+      stroke-width: 2.6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.7rem, 3vw, 2.25rem);
+      line-height: 1.1;
+      margin-bottom: 6px;
+      color: #0b1a32;
+    }
+
+    .lead {
+      color: var(--ink-soft);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 44ch;
+    }
+
+    .order-box {
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      border-radius: 18px;
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .order-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #5b6f90;
+    }
+
+    .order-id {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      color: #0c1c39;
+      word-break: break-word;
+    }
+
+    .order-hint {
+      color: #536482;
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
+    .reference-row {
+      font-size: 0.84rem;
+      color: var(--warn-ink);
+      background: var(--warn-soft);
+      border: 1px solid #fde7c5;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1;
+      padding: 14px 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(140deg, var(--brand) 0%, #1d4ed8 45%, #0ea5a4 100%);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.34);
+    }
+
+    .btn-ghost {
+      color: #254165;
+      background: #edf4ff;
+      border: 1px solid #d6e7ff;
+    }
+
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+      background: #e6f0ff;
+    }
+
+    .btn.disabled,
+    .btn[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: 0.66;
+      filter: grayscale(0.12);
+    }
+
+    .side-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      color: #102d58;
+    }
+
+    .steps {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 12px;
+      align-items: start;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: step-in 0.45s ease forwards;
+    }
+
+    .step:nth-child(1) { animation-delay: 0.12s; }
+    .step:nth-child(2) { animation-delay: 0.2s; }
+    .step:nth-child(3) { animation-delay: 0.28s; }
+    .step:nth-child(4) { animation-delay: 0.36s; }
+
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: #e8f1ff;
+      border: 1px solid #cfe0ff;
+      color: #1f4db4;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      margin-top: 2px;
+    }
+
+    .step h3 {
+      font-size: 0.94rem;
+      margin-bottom: 3px;
+      color: #102d58;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: #5a6c88;
+      line-height: 1.45;
+    }
+
+    .mini-note {
+      background: #f0f9ff;
+      border: 1px solid #cbe6ff;
+      color: #24577e;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      padding: 11px 12px;
+    }
+
+    @keyframes shell-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.985);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(0.75);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes step-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .success-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .side-card {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      .main-card,
+      .side-card {
+        border-radius: 18px;
+      }
+
+      .main-card {
+        padding: 18px;
+      }
+
+      .side-card {
+        padding: 16px;
+      }
+
+      .success-header {
+        align-items: flex-start;
+      }
+
+      .success-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+      }
+
+      .success-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="success-shell">
+    <section class="main-card">
+      <div class="top-meta">
+        <span class="pill success">Payment Confirmed</span>
+        <span class="pill gateway" id="provider-pill">Secure Checkout</span>
+      </div>
+
+      <div class="success-header">
+        <div class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1>Order Confirmed</h1>
+          <p class="lead">
+            Thank you for your purchase. We have received your payment and your order is now entering production.
+          </p>
+        </div>
+      </div>
+
+      <div class="order-box">
+        <div class="order-label">Order Tracking</div>
+        <div id="orderId" class="order-id">Finalizing your order...</div>
+        <p id="orderHint" class="order-hint">This usually takes a few seconds after payment confirmation.</p>
+        <div id="referenceRow" class="reference-row" hidden>
+          Payment Ref:
+          <strong id="paymentRef"></strong>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="#" id="check-order-btn" class="btn btn-primary disabled" aria-disabled="true">Preparing order status link...</a>
+        <a href="/" class="btn btn-ghost">Back to Home</a>
+      </div>
+    </section>
+
+    <aside class="side-card">
+      <h2>What Happens Next</h2>
+      <ul class="steps">
+        <li class="step">
+          <span class="step-dot">1</span>
+          <div>
+            <h3>Payment Validation</h3>
+            <p>We verify your transaction and attach it to your product order.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-dot">2</span>
+          <div>
+            <h3>Order Queue</h3>
+            <p>Your request is queued for production with your selected options and add-ons.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-dot">3</span>
+          <div>
+            <h3>Production Start</h3>
+            <p>Our team begins creating your personalized video according to your delivery priority.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-dot">4</span>
+          <div>
+            <h3>Status Updates</h3>
+            <p>You can use the order status page link to monitor progress and delivery.</p>
+          </div>
+        </li>
+      </ul>
+      <div class="mini-note">
+        If your order link is not ready instantly, wait 30-60 seconds and refresh this page once.
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    (async function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('product');
+      const provider = urlParams.get('provider');
+      const paypalToken = urlParams.get('token');
+      const directOrderId = urlParams.get('order_id');
+      const paymentId = urlParams.get('payment_id');
+      const receiptId = urlParams.get('receipt_id');
+
+      const orderIdEl = document.getElementById('orderId');
+      const orderHintEl = document.getElementById('orderHint');
+      const checkBtn = document.getElementById('check-order-btn');
+      const providerPill = document.getElementById('provider-pill');
+      const referenceRow = document.getElementById('referenceRow');
+      const paymentRefEl = document.getElementById('paymentRef');
+
+      const providerLabels = {
+        paypal: 'PayPal Checkout',
+        paypal_direct: 'PayPal Smart Buttons',
+        whop: 'Whop Checkout'
+      };
+      const PURCHASE_TRACK_KEY = 'analytics_purchase_tracked_v1';
+
+      providerPill.textContent = providerLabels[provider] || 'Secure Checkout';
+
+      const readPendingOrderData = () => {
+        try {
+          const raw = localStorage.getItem('pendingOrderData');
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          return parsed && typeof parsed === 'object' ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const pendingOrderSnapshot = readPendingOrderData();
+
+      const normalizeAmount = (value) => {
+        const amount = Number(value);
+        if (!Number.isFinite(amount) || amount <= 0) return 0;
+        return Math.round(amount * 100) / 100;
+      };
+
+      const dispatchWithRetry = (dispatcher, maxAttempts = 18, delayMs = 500) => {
+        let attempt = 0;
+        const run = () => {
+          attempt += 1;
+          let sent = false;
+          try {
+            sent = dispatcher() === true;
+          } catch (e) {
+            sent = false;
+          }
+          if (!sent && attempt < maxAttempts) {
+            setTimeout(run, delayMs);
+          }
+        };
+        run();
+      };
+
+      const trackPurchaseEvent = (orderId, fallbackAmount) => {
+        const cleanOrderId = String(orderId || '').trim();
+        if (!cleanOrderId) return;
+
+        const amount = normalizeAmount(fallbackAmount || (pendingOrderSnapshot && pendingOrderSnapshot.amount));
+        if (!amount) return;
+
+        const productIdValue = String(productId || (pendingOrderSnapshot && pendingOrderSnapshot.productId) || '').trim();
+        const productTitleValue = String((pendingOrderSnapshot && pendingOrderSnapshot.productTitle) || '').trim();
+        const couponCode = String((pendingOrderSnapshot && pendingOrderSnapshot.coupon && pendingOrderSnapshot.coupon.code) || '').trim();
+        const purchaseKey = `${cleanOrderId}|${productIdValue}|${amount}`;
+
+        try {
+          const seenSession = sessionStorage.getItem(PURCHASE_TRACK_KEY);
+          const seenLocal = localStorage.getItem(PURCHASE_TRACK_KEY);
+          if (seenSession === purchaseKey || seenLocal === purchaseKey) return;
+          sessionStorage.setItem(PURCHASE_TRACK_KEY, purchaseKey);
+          localStorage.setItem(PURCHASE_TRACK_KEY, purchaseKey);
+        } catch (e) {}
+
+        const gaPayload = {
+          transaction_id: cleanOrderId,
+          value: amount,
+          currency: 'USD',
+          items: [
+            {
+              item_id: productIdValue || 'unknown',
+              item_name: productTitleValue || 'Product',
+              price: amount,
+              quantity: 1
+            }
+          ]
+        };
+        if (couponCode) gaPayload.coupon = couponCode;
+
+        const fbPayload = {
+          value: amount,
+          currency: 'USD',
+          content_type: 'product',
+          num_items: 1
+        };
+        if (productIdValue) fbPayload.content_ids = [productIdValue];
+        if (productTitleValue) fbPayload.content_name = productTitleValue;
+
+        dispatchWithRetry(() => {
+          if (typeof window.gtag !== 'function') return false;
+          window.gtag('event', 'purchase', gaPayload);
+          return true;
+        });
+
+        dispatchWithRetry(() => {
+          if (typeof window.fbq !== 'function') return false;
+          window.fbq('track', 'Purchase', fbPayload);
+          return true;
+        });
+      };
+
+      const paymentRef = paymentId || receiptId || paypalToken;
+      if (paymentRef) {
+        paymentRefEl.textContent = paymentRef;
+        referenceRow.hidden = false;
+      }
+
+      const safeJson = async (response) => {
+        try {
+          return await response.json();
+        } catch (e) {
+          return {};
+        }
+      };
+
+      function setPending(label, hint) {
+        orderIdEl.textContent = label || 'Finalizing your order...';
+        orderHintEl.textContent = hint || 'This usually takes a few seconds.';
+        checkBtn.textContent = 'Preparing order status link...';
+        checkBtn.classList.add('disabled');
+        checkBtn.setAttribute('aria-disabled', 'true');
+        checkBtn.href = '#';
+      }
+
+      function setReady(orderId) {
+        orderIdEl.textContent = orderId;
+        orderHintEl.textContent = 'Your order is ready. You can now open live order status.';
+        checkBtn.textContent = 'Check Your Order Status';
+        checkBtn.classList.remove('disabled');
+        checkBtn.removeAttribute('aria-disabled');
+        checkBtn.href = `/buyer-order?id=${encodeURIComponent(orderId)}`;
+      }
+
+      function setSoftFallback() {
+        orderIdEl.textContent = 'Confirmed - Link is being prepared';
+        orderHintEl.textContent = 'Your payment is confirmed. If the status link is not ready yet, refresh in a minute.';
+        checkBtn.textContent = 'Go to Home';
+        checkBtn.classList.remove('disabled');
+        checkBtn.removeAttribute('aria-disabled');
+        checkBtn.href = '/';
+      }
+
+      function setError(message) {
+        orderIdEl.textContent = 'Order finalization issue';
+        orderHintEl.textContent = message || 'Please contact support with your payment reference.';
+        checkBtn.textContent = 'Go to Home';
+        checkBtn.classList.remove('disabled');
+        checkBtn.removeAttribute('aria-disabled');
+        checkBtn.href = '/';
+      }
+
+      setPending('Finalizing your order...', 'Verifying payment and generating your tracking link.');
+
+      // Direct PayPal Smart Button flow (already captured server-side)
+      if (provider === 'paypal_direct' && directOrderId) {
+        setReady(directOrderId);
+        trackPurchaseEvent(directOrderId, pendingOrderSnapshot && pendingOrderSnapshot.amount);
+        return;
+      }
+
+      // PayPal redirect flow requires capture on return
+      if (provider === 'paypal' && paypalToken) {
+        setPending('Capturing PayPal payment...', 'Please wait while we verify your payment.');
+        try {
+          const captureRes = await fetch('/api/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: paypalToken })
+          });
+          const captureData = await safeJson(captureRes);
+
+          if (captureData.success && captureData.order_id) {
+            setReady(captureData.order_id);
+            trackPurchaseEvent(captureData.order_id, pendingOrderSnapshot && pendingOrderSnapshot.amount);
+            window.history.replaceState({}, '', `/success.html?product=${encodeURIComponent(productId || '')}`);
+            return;
+          }
+
+          setError(captureData.error || 'PayPal payment capture failed. Please contact support.');
+          return;
+        } catch (err) {
+          setError('Could not capture PayPal payment automatically. Please contact support.');
+          return;
+        }
+      }
+
+      // Whop/non-paypal flow: recover pending order payload from localStorage
+      let orderData = null;
+      try {
+        const stored = localStorage.getItem('pendingOrderData');
+        if (stored) {
+          orderData = JSON.parse(stored);
+          localStorage.removeItem('pendingOrderData');
+        }
+      } catch (e) {}
+
+      // Attempt to create order if we have enough context
+      if (orderData && (orderData.productId || productId)) {
+        const addons = Array.isArray(orderData.addons) ? orderData.addons : [];
+        let deliveryTime = Number(orderData.deliveryTimeMinutes) || 0;
+
+        if (!deliveryTime) {
+          deliveryTime = 2880;
+          const deliveryAddon = addons.find(a => a && a.field === 'delivery-time');
+          if (deliveryAddon) {
+            const v = String(deliveryAddon.value || '').toLowerCase();
+            if (v.includes('instant') || v.includes('60')) deliveryTime = 60;
+            else if (v.includes('24') || v.includes('express')) deliveryTime = 1440;
+            else if (v.includes('48') || v.includes('2 day')) deliveryTime = 2880;
+          }
+        }
+
+        const payload = {
+          productId: orderData.productId || productId || 1,
+          amount: Number(orderData.amount) || 0,
+          email: orderData.email || '',
+          addons,
+          deliveryTime
+        };
+
+        try {
+          const res = await fetch('/api/order/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await safeJson(res);
+
+          if (res.ok && data && data.orderId) {
+            setReady(data.orderId);
+            trackPurchaseEvent(data.orderId, payload.amount);
+            return;
+          }
+        } catch (err) {}
+      }
+
+      setSoftFallback();
+    })();
+  </script>
+</body>
+</html>

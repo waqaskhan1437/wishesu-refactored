@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /buyer-order
+Disallow: /order-detail
+Disallow: /order-success
+Disallow: /checkout
+Disallow: /success
+
+Sitemap: https://prankwish.com/sitemap.xml

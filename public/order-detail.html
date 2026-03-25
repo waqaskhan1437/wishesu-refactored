@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <title>Order Details</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/whop.css">
+
+  <!-- Preconnect to Whop checkout CDN to reduce connection latency -->
+  <link rel="preconnect" href="https://js.whop.com" crossorigin>
+  <link rel="dns-prefetch" href="https://js.whop.com">
+  <style>
+    body {
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: #6b7280;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    .order-header {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .order-id {
+      font-size: 2em;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 10px;
+    }
+
+    .countdown-timer {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .countdown-timer h2 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+
+    .video-player {
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .video-player video {
+      width: 100%;
+      display: block;
+      max-height: 600px;
+    }
+
+    .action-buttons {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0 8px;
+      font-size: 16px;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .delivery-section {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .delivery-section h3 {
+      margin-top: 0;
+      color: #111827;
+      font-size: 1.5em;
+    }
+
+    .section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .section h3 {
+      margin-top: 0;
+      color: #374151;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .detail-item {
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .detail-label {
+      font-size: 0.85em;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1.1em;
+    }
+
+    .addon-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .addon-item:last-child {
+      border-bottom: none;
+    }
+
+    .addon-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .photo-item {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f3f4f6;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .photo-item:hover {
+      transform: scale(1.05);
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .review-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .rating-stars {
+      display: flex;
+      gap: 8px;
+      font-size: 32px;
+      margin: 15px 0;
+    }
+
+    .rating-stars span {
+      cursor: pointer;
+      color: #d1d5db;
+    }
+
+    .rating-stars span.active {
+      color: #fbbf24;
+    }
+
+    .tip-section {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .tip-amounts {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .tip-btn {
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #fbbf24;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #92400e;
+      cursor: pointer;
+    }
+
+    .tip-btn:hover {
+      background: #fbbf24;
+      color: white;
+    }
+
+    .status-message {
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .status-processing {
+      background: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      color: #1e40af;
+    }
+
+    .status-delivered {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+
+    .admin-only {
+      display: none;
+    }
+
+    .buyer-only {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Load global components asynchronously -->
+  <script defer src="/js/global-components.js"></script>
+  <div class="container">
+    <a href="#" class="back-btn" id="back-btn">← Back</a>
+
+    <div id="loading" style="text-align: center; padding: 40px; color: #6b7280;">
+      <h2>Loading order...</h2>
+    </div>
+
+    <div id="error" style="display: none; background: #fee2e2; color: #991b1b; padding: 20px; border-radius: 8px;">
+    </div>
+
+    <div id="order-content" style="display: none;">
+      <div class="order-header">
+        <div class="order-id" id="order-id-display"></div>
+        <div style="color: #6b7280;" id="order-date"></div>
+      </div>
+
+      <div id="countdown-section" class="countdown-timer" style="display: none;">
+        <h2 id="countdown-display">60:00</h2>
+        <p>Estimated Delivery Time</p>
+      </div>
+
+      <div id="status-message" class="status-message" style="display: none;"></div>
+
+      <!-- UNIVERSAL VIDEO PLAYER SECTION - TOP -->
+      <div id="video-player-section" style="display: none; margin-bottom: 24px;">
+        <div class="section">
+          <h3 style="margin-bottom: 16px;">🎥 Delivered Video</h3>
+          <div id="universal-video-player"
+            style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+
+          <div class="video-actions" style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="#" id="download-btn" class="btn btn-primary" download style="display: none;">⬇️ Download Video</a>
+            <button id="revision-btn" class="btn btn-secondary buyer-only" style="display: none;">🔄 Request
+              Revision</button>
+            <button id="approve-btn" class="btn btn-success buyer-only" style="display: none;">✅ Approve &
+              Review</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN DELIVERY SECTION - TOP -->
+      <div id="delivery-section" class="delivery-section admin-only" style="display: none;">
+        <h3>📤 Deliver Video</h3>
+        <div class="form-group">
+          <label>Buyer Download URL:</label>
+          <input type="text" id="delivery-url" placeholder="https://archive.org/download/.../video.mp4">
+          <small style="color: #6b7280;">Buyer only sees this downloadable link.</small>
+        </div>
+        <div class="form-group">
+          <label>YouTube URL (private for review streaming):</label>
+          <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+          <small style="color: #6b7280;">Optional. This URL is hidden from buyer delivery view.</small>
+        </div>
+        <div class="form-group">
+          <label>OR Upload Video File:</label>
+          <input type="file" id="delivery-file" accept="video/*">
+          <small style="color: #6b7280;">Max 500MB for videos. File will upload to Archive.org</small>
+
+          <!-- Upload Progress Bar -->
+          <div id="upload-progress" style="display: none; margin-top: 10px;">
+            <div style="background: #e5e7eb; border-radius: 8px; overflow: hidden; height: 8px;">
+              <div id="progress-bar"
+                style="background: linear-gradient(90deg, #3b82f6, #1d4ed8); height: 100%; width: 0%; transition: width 0.3s ease;">
+              </div>
+            </div>
+            <div id="progress-text" style="font-size: 14px; color: #6b7280; margin-top: 5px;">Preparing upload...</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Thumbnail URL (optional):</label>
+          <input type="text" id="thumbnail-url">
+        </div>
+        <div class="form-group">
+          <label>Subtitles URL (.vtt) (optional):</label>
+          <input type="text" id="subtitles-url" placeholder="https://.../subtitles.vtt">
+        </div>
+        <button class="btn btn-primary" id="submit-delivery-btn">✅ Submit Delivery</button>
+      </div>
+
+
+      <div class="section">
+        <h3>📋 Order Information</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value" id="email-display"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value" id="amount-display"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value" id="status-display"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Delivery Time</div>
+            <div class="detail-value" id="delivery-time-display"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>📝 Requirements</h3>
+        <div id="requirements-list"></div>
+        <div id="photos-section" style="display: none;">
+          <h4 style="margin-top: 20px;">📷 Uploaded Photos:</h4>
+          <div class="photos-grid" id="photos-grid"></div>
+        </div>
+      </div>
+
+      <div id="review-section" class="review-section buyer-only">
+        <h3>⭐ Leave a Review</h3>
+        <form id="review-form">
+          <div class="form-group">
+            <label>Your Name: <small style="color:#6b7280;font-weight:normal">(max 50)</small></label>
+            <input type="text" id="reviewer-name" required maxlength="50">
+          </div>
+          <div class="form-group">
+            <label>Rating:</label>
+            <div class="rating-stars" id="rating-stars">
+              <span data-rating="1">★</span>
+              <span data-rating="2">★</span>
+              <span data-rating="3">★</span>
+              <span data-rating="4">★</span>
+              <span data-rating="5">★</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Comment: <small style="color:#6b7280;font-weight:normal">(max 1000)</small></label>
+            <textarea id="review-comment" required maxlength="1000" minlength="5"></textarea>
+            <div style="text-align:right;font-size:0.75rem;color:#6b7280;margin-top:2px"><span
+                id="comment-count">0</span>/1000</div>
+          </div>
+          <div style="margin: 15px 0;">
+            <label><input type="checkbox" id="portfolio-checkbox" checked> Show in portfolio</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+      </div>
+
+      <div id="tip-section" class="tip-section buyer-only">
+        <h3>💝 Love Your Video? Leave a Tip!</h3>
+        <div class="tip-amounts">
+          <button class="tip-btn" data-amount="10">$10</button>
+          <button class="tip-btn" data-amount="15">$15</button>
+          <button class="tip-btn" data-amount="20">$20</button>
+          <button class="tip-btn" data-amount="25">$25</button>
+          <button class="tip-btn" data-amount="30">$30</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script defer src="/js/universal-player.js"></script>
+  <script defer src="/js/shared-timer-utils.js"></script>
+  <script defer src="/js/review-utils.js"></script>
+  <!-- Load Whop checkout integration without blocking rendering -->
+  <script defer src="/js/whop/checkout.js?v=27"></script>
+  <script defer src="/js/tip-checkout.js"></script>
+  <script defer src="/js/order-viewer.js?v=2"></script>
+
+</body>
+
+</html>

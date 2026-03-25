@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Secure Checkout | prankwish.com</title>
+  <style>
+    :root {
+      --bg-a: #0f172a;
+      --bg-b: #111827;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-soft: #e0e7ff;
+      --ok: #0f766e;
+      --ok-soft: #ccfbf1;
+      --err: #b91c1c;
+      --err-soft: #fee2e2;
+      --border: #dbeafe;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 12% 8%, #1d4ed8 0%, transparent 55%),
+        radial-gradient(1200px 700px at 88% 92%, #0891b2 0%, transparent 58%),
+        linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1040px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+    }
+
+    .summary,
+    .checkout {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 26px 50px rgba(2, 6, 23, 0.28);
+    }
+
+    .summary {
+      padding: 22px;
+      border: 1px solid rgba(219, 234, 254, 0.7);
+      align-self: start;
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .summary-headline {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1e3a8a;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .summary h1 {
+      font-size: 1.25rem;
+      margin: 14px 0 8px;
+      line-height: 1.35;
+    }
+
+    .amount-label {
+      margin-top: 14px;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .total {
+      margin: 4px 0 0;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .product-preview {
+      margin-top: 12px;
+      padding: 10px;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      background: #f8fbff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex: 0 0 46px;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+    }
+
+    .product-preview-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .product-preview-label {
+      color: #64748b;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .product-preview-title {
+      color: #0f172a;
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.32;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-details {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed #cbd5e1;
+    }
+
+    .summary-details > summary {
+      list-style: none;
+      cursor: pointer;
+      border: 1px solid #bfdbfe;
+      border-radius: 11px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      user-select: none;
+    }
+
+    .summary-details > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-details > summary::after {
+      content: "Show";
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #1d4ed8;
+    }
+
+    .summary-details[open] > summary::after {
+      content: "Hide";
+    }
+
+    .meta {
+      margin-top: 12px;
+      padding-top: 0;
+      border-top: 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .meta-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dotted #dbeafe;
+    }
+
+    .meta-line:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .meta-label {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .meta-value {
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: right;
+      max-width: 68%;
+      overflow-wrap: anywhere;
+    }
+
+    .summary .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .summary-top .actions {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all .15s ease;
+    }
+
+    .btn:hover {
+      border-color: #93c5fd;
+      background: #eff6ff;
+    }
+
+    .checkout {
+      padding: 20px;
+      border: 1px solid rgba(219, 234, 254, 0.7);
+    }
+
+    .checkout-methods {
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      background: #f8fbff;
+    }
+
+    .method-header {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 9px;
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .method-btn {
+      border: 1px solid #bfdbfe;
+      background: #ffffff;
+      border-radius: 10px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+      text-align: left;
+    }
+
+    .method-btn:hover {
+      border-color: #60a5fa;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .method-btn.active {
+      border-color: #1d4ed8;
+      background: #eff6ff;
+      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.1);
+    }
+
+    .method-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .method-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .method-title {
+      color: #0f172a;
+      font-size: 0.84rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .method-note {
+      color: #64748b;
+      font-size: 0.72rem;
+      line-height: 1.25;
+    }
+
+    .status {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .status.info {
+      color: #1d4ed8;
+      background: #dbeafe;
+    }
+
+    .status.ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .status.error {
+      color: var(--err);
+      background: var(--err-soft);
+    }
+
+    .embed-shell {
+      min-height: 620px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(700px 260px at 50% -20%, #eef2ff 0%, transparent 64%),
+        #ffffff;
+      padding: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .paypal-pane {
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      padding: 22px;
+      border-radius: 12px;
+      background:
+        radial-gradient(420px 160px at 50% -20%, #fff7ed 0%, transparent 62%),
+        #ffffff;
+      border: 1px solid #fed7aa;
+    }
+
+    .paypal-title {
+      color: #111827;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .paypal-note {
+      margin: 0;
+      color: #64748b;
+      max-width: 420px;
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    .paypal-btn {
+      margin-top: 8px;
+      border: 0;
+      border-radius: 999px;
+      min-height: 46px;
+      min-width: 220px;
+      padding: 0 20px;
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: #0f172a;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      box-shadow: 0 12px 26px rgba(245, 158, 11, 0.28);
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+
+    .paypal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(245, 158, 11, 0.32);
+    }
+
+    .paypal-btn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+      transform: none;
+    }
+
+    .loader {
+      min-height: 560px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #dbeafe;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+      .summary {
+        position: static;
+        top: auto;
+        z-index: auto;
+        padding: 14px;
+      }
+      .summary-top {
+        align-items: center;
+      }
+      .badge {
+        display: none;
+      }
+      .summary h1 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .amount-label {
+        margin-top: 10px;
+      }
+      .total {
+        font-size: 1.5rem;
+      }
+      .product-preview {
+        margin-top: 10px;
+        padding: 8px;
+      }
+      .product-thumb {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+      }
+      .product-preview-label {
+        font-size: 0.7rem;
+      }
+      .product-preview-title {
+        font-size: 0.84rem;
+      }
+      .summary .actions {
+        margin-top: 8px;
+      }
+      .btn {
+        padding: 8px 11px;
+        font-size: 0.84rem;
+      }
+      .summary-details {
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .summary-details > summary {
+        font-size: 0.86rem;
+        padding: 9px 11px;
+      }
+      .meta {
+        margin-top: 9px;
+      }
+      .meta-line {
+        padding: 6px 0;
+      }
+      .meta-label,
+      .meta-value {
+        font-size: 0.82rem;
+      }
+      .embed-shell {
+        min-height: 520px;
+      }
+      .checkout-methods {
+        padding: 10px;
+      }
+      .method-grid {
+        grid-template-columns: 1fr;
+      }
+      .method-btn {
+        min-height: 52px;
+      }
+      .loader {
+        min-height: 470px;
+      }
+      .paypal-pane {
+        min-height: 280px;
+        padding: 16px;
+      }
+      .paypal-title {
+        font-size: 1.1rem;
+      }
+      .paypal-note {
+        font-size: 0.86rem;
+      }
+      .paypal-btn {
+        min-width: 190px;
+        min-height: 42px;
+        font-size: 0.88rem;
+      }
+    }
+
+    @media (min-width: 901px) {
+      .summary-details > summary {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="summary">
+      <div class="summary-top">
+        <div class="summary-headline">
+          <div class="badge">Secure Checkout</div>
+          <h1>Secure checkout</h1>
+        </div>
+        <div class="actions">
+          <a class="btn" id="checkout-back-link" href="/">Back</a>
+        </div>
+      </div>
+      <div class="product-preview" id="checkout-product-preview" hidden>
+        <img id="checkout-product-thumb" class="product-thumb" alt="Product thumbnail">
+        <div class="product-preview-text">
+          <div class="product-preview-label">Product</div>
+          <div class="product-preview-title" id="checkout-product-title">Loading product...</div>
+        </div>
+      </div>
+      <div class="amount-label">Total amount</div>
+      <div class="total" id="checkout-total">$0.00</div>
+      <details class="summary-details" id="summary-details" open>
+        <summary>Order details</summary>
+        <div class="meta" id="checkout-meta">
+          Preparing order details...
+        </div>
+      </details>
+    </section>
+
+    <section class="checkout">
+      <div id="checkout-methods" class="checkout-methods" hidden></div>
+      <div id="checkout-status" class="status info">Initializing secure checkout...</div>
+      <div id="checkout-embed" class="embed-shell">
+        <div class="loader">
+          <div class="spinner" aria-hidden="true"></div>
+          <div>Setting up your checkout session...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/checkout-page.js?v=5" defer></script>
+</body>
+</html>

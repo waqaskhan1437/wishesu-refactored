@@ -1,0 +1,276 @@
+;">Unknown</div>';
+      }
+    }
+
+    function renderCard(p) {
+      const price = p.sale_price || p.normal_price;
+      const old = p.sale_price && p.normal_price > p.sale_price ? p.normal_price : null;
+      return `<div class="product-card-preview">
+        <img src="${p.thumbnail_url || 'https://via.placeholder.com/300x160'}" alt="">
+        <div class="card-body">
+          <h3>${p.title}</h3>
+          <div class="price">$${price}${old ? `<span class="old">$${old}</span>` : ''}</div>
+          <button class="buy-btn" onclick="window.open('/product?id=${p.id}','_blank')">View Product</button>
+        </div>
+      </div>`;
+    }
+
+    function renderReview(r) {
+      return `<div class="review-card-preview">
+        <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        <div class="comment">"${r.comment || 'Great!'}"</div>
+        <div class="author">${r.author_name}</div>
+        ${r.product_title ? `<div class="product-name">on ${r.product_title}</div>` : ''}
+      </div>`;
+    }
+
+    function selectSection(id) {
+      selectedSection = id;
+      renderCanvas();
+      renderSettings();
+    }
+
+    function renderSettings() {
+      const c = document.getElementById('settings-content');
+      const sec = sections.find(s => s.id === selectedSection);
+      if (!sec) { c.innerHTML = '<p style="color:#94a3b8;text-align:center;">Select a section</p>'; return; }
+      const s = sec.settings;
+      let html = '';
+
+      if (['hero','cta'].includes(sec.type)) {
+        html = `
+          <div class="setting-group"><label>Title</label><input value="${s.title}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Subtitle</label><input value="${s.subtitle||''}" onchange="updateSetting('subtitle',this.value)"></div>
+          <div class="setting-group"><label>Button Text</label><input value="${s.btnText}" onchange="updateSetting('btnText',this.value)"></div>
+          <div class="setting-group"><label>Button Link</label><input value="${s.btnLink}" onchange="updateSetting('btnLink',this.value)"></div>
+        `;
+      } else if (['products-grid','products-slider'].includes(sec.type)) {
+        html = `
+          <div class="setting-group"><label>Title</label><input value="${s.title}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Select Products</label>
+            <div class="product-selector">${products.map(p => `
+              <div class="product-option ${(s.productIds||[]).includes(p.id)?'selected':''}" onclick="toggleProd(${p.id})">
+                <img src="${p.thumbnail_url||'https://via.placeholder.com/50'}">
+                <div class="product-option-info"><h4>${p.title}</h4><span>$${p.sale_price||p.normal_price}</span></div>
+              </div>`).join('')}
+            </div>
+          </div>
+        `;
+      } else if (sec.type === 'single-product') {
+        html = `
+          <div class="setting-group"><label>Title (optional)</label><input value="${s.title||''}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Select Product</label>
+            <div class="product-selector">${products.map(p => `
+              <div class="product-option ${s.productId===p.id?'selected':''}" onclick="updateSetting('productId',${p.id})">
+                <img src="${p.thumbnail_url||'https://via.placeholder.com/50'}">
+                <div class="product-option-info"><h4>${p.title}</h4><span>$${p.sale_price||p.normal_price}</span></div>
+              </div>`).join('')}
+            </div>
+          </div>
+        `;
+      } else if (['reviews-grid','reviews-slider'].includes(sec.type)) {
+        html = `
+          <div class="setting-group"><label>Title</label><input value="${s.title}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Number of Reviews</label><input type="number" value="${s.count||6}" min="1" max="20" onchange="updateSetting('count',+this.value)"></div>
+        `;
+      } else if (sec.type === 'features') {
+        html = `
+          <div class="setting-group"><label>Title</label><input value="${s.title}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Features (JSON)</label><textarea onchange="updateSetting('items',JSON.parse(this.value))">${JSON.stringify(s.items,null,2)}</textarea></div>
+        `;
+      } else if (sec.type === 'text') {
+        html = `
+          <div class="setting-group"><label>Title</label><input value="${s.title}" onchange="updateSetting('title',this.value)"></div>
+          <div class="setting-group"><label>Content</label><textarea onchange="updateSetting('content',this.value)">${s.content}</textarea></div>
+        `;
+      }
+      c.innerHTML = html;
+    }
+
+    function updateSetting(k, v) {
+      const sec = sections.find(s => s.id === selectedSection);
+      if (sec) { sec.settings[k] = v; renderCanvas(); }
+    }
+
+    function toggleProd(id) {
+      const sec = sections.find(s => s.id === selectedSection);
+      if (!sec) return;
+      if (!sec.settings.productIds) sec.settings.productIds = [];
+      const idx = sec.settings.productIds.indexOf(id);
+      if (idx > -1) sec.settings.productIds.splice(idx, 1);
+      else sec.settings.productIds.push(id);
+      renderCanvas();
+      renderSettings();
+    }
+
+    function moveSection(id, dir) {
+      const i = sections.findIndex(s => s.id === id);
+      const ni = i + dir;
+      if (ni < 0 || ni >= sections.length) return;
+      [sections[i], sections[ni]] = [sections[ni], sections[i]];
+      renderCanvas();
+    }
+
+    function deleteSection(id) {
+      if (!confirm('Delete?')) return;
+      sections = sections.filter(s => s.id !== id);
+      if (selectedSection === id) selectedSection = null;
+      renderCanvas();
+      renderSettings();
+    }
+
+    function clearCanvas() {
+      if (!confirm('Clear all?')) return;
+      sections = [];
+      selectedSection = null;
+      renderCanvas();
+      renderSettings();
+    }
+
+    function previewPage() {
+      const html = generateHTML();
+      const blob = new Blob([html], { type: 'text/html' });
+      window.open(URL.createObjectURL(blob), '_blank');
+    }
+
+    function generateHTML() {
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${document.getElementById('page-title').value||'Landing Page'}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.preview-hero{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:80px 40px;text-align:center}.preview-hero h1{font-size:2.5em;margin-bottom:20px}.preview-hero p{font-size:1.2em;margin-bottom:30px;opacity:.9}.preview-hero button{padding:16px 40px;background:#fff;color:#667eea;border:none;border-radius:10px;font-weight:700;font-size:1.1em;cursor:pointer}.preview-products{padding:60px 40px}.preview-products h2{text-align:center;font-size:2em;margin-bottom:40px;color:#1f2937}.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:25px}.products-slider{display:flex;gap:25px;overflow-x:auto;padding:10px 0 20px}.products-slider .product-card-preview{min-width:280px}.product-card-preview{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #e5e7eb}.product-card-preview img{width:100%;height:160px;object-fit:cover}.product-card-preview .card-body{padding:20px}.product-card-preview h3{font-size:1em;color:#1f2937;margin-bottom:8px}.product-card-preview .price{font-size:1.2em;font-weight:700;color:#10b981}.product-card-preview .price .old{font-size:.8em;color:#9ca3af;text-decoration:line-through;margin-left:8px}.product-card-preview .buy-btn{width:100%;padding:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:15px}.preview-reviews{padding:60px 40px;background:#f8fafc}.preview-reviews h2{text-align:center;font-size:2em;margin-bottom:40px;color:#1f2937}.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:25px}.reviews-slider{display:flex;gap:25px;overflow-x:auto;padding:10px 0 20px}.reviews-slider .review-card-preview{min-width:320px}.review-card-preview{background:#fff;border-radius:16px;padding:25px;box-shadow:0 4px 20px rgba(0,0,0,.08)}.review-card-preview .stars{color:#fbbf24;font-size:1.2em;margin-bottom:12px}.review-card-preview .comment{color:#4b5563;font-size:.95em;line-height:1.6;margin-bottom:15px}.review-card-preview .author{font-weight:600;color:#1f2937}.review-card-preview .product-name{font-size:.85em;color:#6b7280}.preview-features{padding:60px 40px}.preview-features h2{text-align:center;font-size:2em;margin-bottom:50px;color:#1f2937}.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px}.feature-card{text-align:center;padding:30px}.feature-card .icon{width:70px;height:70px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2em;margin:0 auto 20px}.feature-card h3{color:#1f2937;margin-bottom:10px}.feature-card p{color:#6b7280}.preview-cta{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:80px 40px;text-align:center}.preview-cta h2{font-size:2.2em;margin-bottom:20px}.preview-cta p{font-size:1.1em;margin-bottom:30px;opacity:.9}.preview-cta button{padding:16px 50px;background:#fff;color:#3b82f6;border:none;border-radius:10px;font-weight:700;font-size:1.1em;cursor:pointer}.preview-text{padding:60px 40px}.preview-text h2{font-size:1.8em;color:#1f2937;margin-bottom:20px}.preview-text p{color:#4b5563;line-height:1.8;font-size:1.05em}.section-wrapper{border:none!important}.section-controls{display:none!important}</style></head><body>${document.getElementById('canvas').innerHTML}</body></html>`;
+    }
+
+    function showEmbedCode() {
+      document.getElementById('embed-modal').classList.add('active');
+      
+      // Products Widget
+      document.getElementById('products-widget-code').textContent = `<!-- Products Widget -->
+<div id="shop-products"></div>
+<script>
+fetch('${API}/api/products').then(r=>r.json()).then(d=>{
+  const c=document.getElementById('shop-products');
+  c.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:25px;">'+
+    (d.products||[]).map(p=>\`<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #e5e7eb">
+      <img loading="lazy" src="\${p.thumbnail_url||'https://via.placeholder.com/300x160'}" style="width:100%;height:160px;object-fit:cover">
+      <div style="padding:20px">
+        <h3 style="font-size:1em;color:#1f2937;margin-bottom:8px">\${p.title}</h3>
+        <div style="font-size:1.2em;font-weight:700;color:#10b981">$\${p.sale_price||p.normal_price}</div>
+        <a href="${API}/product?id=\${p.id}" style="display:block;width:100%;padding:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:8px;font-weight:600;text-align:center;text-decoration:none;margin-top:15px">View</a>
+      </div>
+    </div>\`).join('')+'</div>';
+});
+<\/script>`;
+
+      // Reviews Widget
+      document.getElementById('reviews-widget-code').textContent = `<!-- Reviews Widget -->
+<div id="shop-reviews"></div>
+<script>
+fetch('${API}/api/reviews').then(r=>r.json()).then(d=>{
+  const c=document.getElementById('shop-reviews');
+  c.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:25px;">'+
+    (d.reviews||[]).slice(0,6).map(r=>\`<div style="background:#fff;border-radius:16px;padding:25px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+      <div style="color:#fbbf24;font-size:1.2em;margin-bottom:12px">\${'★'.repeat(r.rating)}\${'☆'.repeat(5-r.rating)}</div>
+      <div style="color:#4b5563;line-height:1.6;margin-bottom:15px">"\${r.comment||'Great!'}"</div>
+      <div style="font-weight:600;color:#1f2937">\${r.author_name}</div>
+    </div>\`).join('')+'</div>';
+});
+<\/script>`;
+
+      // Single Product
+      const firstProd = products[0];
+      document.getElementById('single-product-code').textContent = `<!-- Single Product Card (change ID) -->
+<div id="product-card-${firstProd?.id||1}"></div>
+<script>
+fetch('${API}/api/product/${firstProd?.id||1}').then(r=>r.json()).then(d=>{
+  const p=d.product;
+  document.getElementById('product-card-${firstProd?.id||1}').innerHTML=\`
+    <div style="max-width:350px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #e5e7eb">
+      <img loading="lazy" src="\${p.thumbnail_url||'https://via.placeholder.com/350x180'}" style="width:100%;height:180px;object-fit:cover">
+      <div style="padding:20px">
+        <h3 style="font-size:1.1em;color:#1f2937;margin-bottom:8px">\${p.title}</h3>
+        <div style="font-size:1.3em;font-weight:700;color:#10b981">$\${p.sale_price||p.normal_price}</div>
+        <a href="${API}/product?id=\${p.id}" style="display:block;width:100%;padding:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:8px;font-weight:600;text-align:center;text-decoration:none;margin-top:15px">View Product</a>
+      </div>
+    </div>\`;
+});
+<\/script>`;
+    }
+
+    function closeModal() {
+      document.getElementById('embed-modal').classList.remove('active');
+    }
+
+    function copyCode(id) {
+      navigator.clipboard.writeText(document.getElementById(id).textContent);
+      alert('✅ Copied!');
+    }
+
+    function downloadHTML() {
+      const html = generateHTML();
+      const blob = new Blob([html], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (document.getElementById('page-slug').value || 'landing-page') + '.html';
+      a.click();
+    }
+
+    let currentPageId = null;
+
+    async function loadPages() {
+      try {
+        const res = await fetch('/api/pages');
+        const data = await res.json();
+        pages = data.pages || [];
+        document.getElementById('page-select').innerHTML = '<option value="">New Page</option>' +
+          pages.map(p => `<option value="${p.id}">${p.title}</option>`).join('');
+      } catch (e) {}
+    }
+
+    async function savePage() {
+      const title = document.getElementById('page-title').value;
+      const slug = document.getElementById('page-slug').value;
+      if (!title || !slug) { alert('Enter title and slug'); return; }
+
+      try {
+        const payload = { title, slug, content: JSON.stringify(sections) };
+        if (currentPageId) payload.id = currentPageId;
+
+        const res = await fetch('/api/page/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentPageId = data.id ? Number(data.id) : currentPageId;
+          alert('✅ Saved!');
+          loadPages();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    document.getElementById('page-select').onchange = async function() {
+      if (!this.value) {
+        currentPageId = null;
+        sections = [];
+        document.getElementById('page-title').value = '';
+        document.getElementById('page-slug').value = '';
+        renderCanvas();
+        return;
+      }
+      const page = pages.find(p => p.id == this.value);
+      if (page) {
+        currentPageId = Number(page.id) || null;
+        document.getElementById('page-title').value = page.title;
+        document.getElementById('page-slug').value = page.slug;
+        try {
+          const res = await fetch(`/api/page/${page.slug}`);
+          const data = await res.json();
+          sections = data.page?.content ? JSON.parse(data.page.content) : [];
+        } catch (e) { sections = []; }
+        renderCanvas();
+      }
+    };
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Page Builder</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --success: #10b981;
+      --success-dark: #059669;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #1f2937;
+      --gray: #6b7280;
+      --light: #f3f4f6;
+      --border: #e5e7eb;
+      --top-bar-height: 60px;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; }
+    
+    /* Top Bar */
+    .top-bar {
+      background: linear-gradient(135deg, var(--dark) 0%, #374151 100%);
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: var(--top-bar-height);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 15px; }
+    .back-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.2); }
+    .top-bar h1 { font-size: 1.3rem; font-weight: 600; }
+    .top-bar-actions { display: flex; gap: 10px; }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: var(--success-dark); }
+    .btn-secondary { background: var(--gray); color: white; }
+    .btn-secondary:hover { background: #4b5563; }
+    
+    /* Main Layout */
+    .builder-wrapper {
+      display: flex;
+      height: calc(100vh - var(--top-bar-height));
+      margin-top: var(--top-bar-height);
+    }
+    
+    /* Left Sidebar - Templates */
+    .sidebar-left {
+      width: 240px;
+      background: white;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-section {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-section h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Quick Templates */
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .template-card {
+      background: var(--light);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 15px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .template-card:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+    .template-card .icon {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .template-card .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    /* Section Blocks */
+    .block-list { display: flex; flex-direction: column; gap: 8px; }
+    .block-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      background: var(--light);
+      color: var(--dark);
+      border: 1px solid transparent;
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .block-btn:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
+    }
+    .block-btn .icon { font-size: 1.1rem; }
+    
+    /* Canvas */
+    #builder-canvas {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      background: #f1f5f9;
+    }
+    #builder-canvas.empty::before {
+      content: '👆 Select a quick template or add sections from the sidebar';
+      display: block;
+      text-align: center;
+      padding: 100px 40px;
+      color: var(--gray);
+      font-size: 1.1rem;
+      background: white;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+    }
+    
+    .section-wrapper {
+      position: relative;
+      border: 2px dashed var(--border);
+      margin-bottom: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    .section-wrapper:hover { border-color: var(--primary); }
+    .section-wrapper:focus-within { border-color: var(--success); }
+    
+    .section-controls {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .section-wrapper:hover .section-controls { opacity: 1; }
+    .section-controls button {
+      background: var(--dark);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+    .section-controls button:hover { background: #374151; transform: scale(1.05); }
+
+    /* Product & Blog Cards inside builder canvas */
+    #builder-canvas .product-cards-grid,
+    #builder-canvas .blog-cards-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 20px !important;
+      max-width: 100% !important;
+    }
+    #builder-canvas .product-card,
+    #builder-canvas .blog-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #builder-canvas .product-thumbnail,
+    #builder-canvas .blog-thumbnail {
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #f3f4f6;
+    }
+    #builder-canvas .product-thumbnail img,
+    #builder-canvas .blog-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #builder-canvas .product-content,
+    #builder-canvas .blog-content {
+      padding: 15px;
+    }
+    #builder-canvas .product-title,
+    #builder-canvas .blog-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #1f2937;
+    }
+    #builder-canvas .book-now-btn,
+    #builder-canvas .blog-read-more {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    @media (max-width: 1200px) {
+      #builder-canvas .product-cards-grid,
+      #builder-canvas .blog-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    /* Right Sidebar - Settings */
+    .sidebar-right {
+      width: 250px;
+      background: white;
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .settings-panel {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-panel h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gray);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    
+    /* Page Type Selector */
+    .page-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .type-option {
+      padding: 12px 10px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    .type-option:hover { border-color: var(--primary); }
+    .type-option.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+    .type-option .icon { font-size: 1.3rem; margin-bottom: 5px; }
+    .type-option .label { font-size: 0.75rem; font-weight: 600; color: var(--dark); }
+    
+    /* Default Toggle */
+    .default-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      background: var(--light);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .default-toggle:hover { background: #e5e7eb; }
+    .default-toggle input { display: none; }
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: #d1d5db;
+      border-radius: 12px;
+      position: relative;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .default-toggle input:checked + .toggle-switch {
+      background: var(--success);
+    }
+    .default-toggle input:checked + .toggle-switch::after {
+      left: 23px;
+    }
+    .toggle-label {
+      flex: 1;
+    }
+    .toggle-label .title {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.9rem;
+    }
+    .toggle-label .desc {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+    
+    /* Code Editor Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px;
+      background: var(--dark);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { margin: 0; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .modal-body textarea {
+      width: 100%;
+      height: 350px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      padding: 15px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      resize: none;
+    }
+    .modal-footer {
+      padding: 15px 20px;
+      background: var(--light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .sidebar-left { width: 200px; }
+      .sidebar-right { width: 220px; }
+    }
+    @media (max-width: 1100px) {
+      .sidebar-left, .sidebar-right { display: none; }
+      #builder-canvas { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <a href="/admin/dashboard.html" class="back-btn">← Dashboard</a>
+      <h1>🎨 Page Builder</h1>
+    </div>
+    <div class="top-bar-actions">
+      <button class="btn btn-secondary" id="load-btn">📂 Load</button>
+      <button class="btn btn-secondary" id="preview-btn">👁️ Preview</button>
+      <button class="btn btn-success" id="save-btn">💾 Save Page</button>
+    </div>
+  </div>
+
+  <div class="builder-wrapper">
+    <!-- Left Sidebar -->
+    <div class="sidebar-left">
+      <!-- Quick Templates -->
+      <div class="sidebar-section">
+        <h3>⚡ Quick Templates</h3>
+        <div class="template-grid">
+          <div class="template-card" onclick="loadTemplate('home')">
+            <div class="icon">🏠</div>
+            <div class="label">Home Page</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('blog_archive')">
+            <div class="icon">📝</div>
+            <div class="label">Blog Archive</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('forum_archive')">
+            <div class="icon">💬</div>
+            <div class="label">Forum Page</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('product_grid')">
+            <div class="icon">🛒</div>
+            <div class="label">Product Grid</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('occasion_campaign')">
+            <div class="icon">O</div>
+            <div class="label">Occasion Landing</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('about_story')">
+            <div class="icon">A</div>
+            <div class="label">About Story</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('faq_contact')">
+            <div class="icon">Q</div>
+            <div class="label">FAQ + Contact</div>
+          </div>
+          <div class="template-card" onclick="loadTemplate('creator_profile')">
+            <div class="icon">C</div>
+            <div class="label">Creator Profile</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Section Blocks -->
+      <div class="sidebar-section" style="flex:1;">
+        <h3>📦 Add Sections</h3>
+        <div class="block-list">
+          <button class="block-btn" onclick="addSection('hero')">
+            <span class="icon">🎯</span> Hero Banner
+          </button>
+          <button class="block-btn" onclick="addSection('features')">
+            <span class="icon">⭐</span> Features Grid
+          </button>
+          <button class="block-btn" onclick="addSection('cta')">
+            <span class="icon">📢</span> Call to Action
+          </button>
+          <button class="block-btn" onclick="addSection('text')">
+            <span class="icon">📄</span> Text Block
+          </button>
+          <button class="block-btn" onclick="addSection('products')">
+            <span class="icon">🛍️</span> Product Cards
+          </button>
+          <button class="block-btn" onclick="addSection('blogs')">
+            <span class="icon">📰</span> Blog Cards
+          </button>
+          <button class="block-btn" onclick="addSection('forum')">
+            <span class="icon">❓</span> Forum List
+          </button>
+          <button class="block-btn" onclick="addSection('footer')">
+            <span class="icon">📌</span> Footer
+          </button>
+          <button class="block-btn" onclick="addSection('custom')">
+            <span class="icon">💻</span> Custom HTML
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div id="builder-canvas" class="empty"></div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar-right">
+      <!-- Page Info -->
+      <div class="settings-panel">
+        <h3>📄 Page Settings</h3>
+        <div class="form-group">
+          <label>Page Title *</label>
+          <input type="text" id="seo-title" placeholder="My Awesome Page">
+        </div>
+        <div class="form-group">
+          <label>URL Slug</label>
+          <input type="text" id="seo-slug" placeholder="my-awesome-page">
+        </div>
+        <div class="form-group">
+          <label>Meta Description</label>
+          <textarea id="seo-desc" placeholder="Brief description for search engines..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>🖼️ Feature Image</label>
+          <div style="display:flex;gap:8px;">
+            <input type="url" id="feature_image_url" placeholder="https://..." style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;">
+            <label for="feature-image-file" style="cursor:pointer;padding:10px 16px;background:var(--primary);color:white;border-radius:8px;font-weight:600;">📤 Upload</label>
+            <input type="file" id="feature-image-file" accept="image/*" style="display:none;">
+          </div>
+          <div id="feature-preview" style="margin-top:8px;max-height:100px;overflow:hidden;border-radius:8px;display:none;"></div>
+          <small>URL or auto-upload to R2 (10MB max).</small>
+        </div>
+      </div>
+
+      <!-- Page Type -->
+      <div class="settings-panel">
+        <h3>📑 Page Type</h3>
+        <div class="page-type-grid">
+          <div class="type-option active" data-type="custom" onclick="setPageType('custom')">
+            <div class="icon">📄</div>
+            <div class="label">Custom</div>
+          </div>
+          <div class="type-option" data-type="home" onclick="setPageType('home')">
+            <div class="icon">🏠</div>
+            <div class="label">Home</div>
+          </div>
+          <div class="type-option" data-type="blog_archive" onclick="setPageType('blog_archive')">
+            <div class="icon">📝</div>
+            <div class="label">Blog</div>
+          </div>
+          <div class="type-option" data-type="forum_archive" onclick="setPageType('forum_archive')">
+            <div class="icon">💬</div>
+            <div class="label">Forum</div>
+          </div>
+          <div class="type-option" data-type="product_grid" onclick="setPageType('product_grid')">
+            <div class="icon">🛒</div>
+            <div class="label">Products</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Default Setting -->
+      <div class="settings-panel">
+        <h3>⭐ Default Page</h3>
+        <label class="default-toggle">
+          <input type="checkbox" id="is-default">
+          <span class="toggle-switch"></span>
+          <div class="toggle-label">
+            <div class="title">Set as Default</div>
+            <div class="desc">Use this as the default page for selected type</div>
+          </div>
+        </label>
+        <p id="default-info" style="margin-top:12px;font-size:0.8rem;color:var(--gray);display:none;"></p>
+      </div>
+      
+      <!-- Current Defaults -->
+      <div class="settings-panel">
+        <h3>📌 Current Defaults</h3>
+        <div id="defaults-list" style="font-size:0.85rem;color:var(--gray);">
+          Loading...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Editor Modal -->
+  <div class="modal-overlay" id="code-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💻 Edit HTML Code</h3>
+        <button class="modal-close" onclick="closeCodeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="code-editor" placeholder="Enter your HTML code..."></textarea>
+        <div style="margin-top:15px;padding:12px;background:#fef3c7;border-radius:8px;font-size:0.85rem;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="preserve-custom-code" checked style="width:18px;height:18px;">
+            <span><strong>Preserve Custom Code</strong> - Uncheck to re-render product/blog widgets from API</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCodeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCode()">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="/js/product-cards.js"></script>
+  <script defer src="/js/blog-cards.js"></script>
+  <script defer src="/js/instant-upload.js"></script>
+  <script>
+    // State
+    let currentPageType = 'custom';
+    let editingSection = null;
+    let editingPageId = null;
+    let originalPageSlug = '';
+    let previousEditableSlug = '';
+    
+    // Get hero section with optional feature image
+    function getHeroSection() {
+      const featureImg = document.getElementById('feature_image_url').value.trim();
+      if (featureImg) {
+        return `<section style="background:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${featureImg}') center/cover;color:white;padding:80px 20px;text-align:center;min-height:300px;">
+          <h1 style="font-size:3rem;margin-bottom:20px;font-weight:700;" contenteditable="true">Welcome to Our Site</h1>
+          <p style="font-size:1.2rem;opacity:0.9;max-width:600px;margin:0 auto 30px;" contenteditable="true">Create amazing pages with our easy-to-use builder</p>
+          <button style="background:white;color:#333;padding:15px 40px;border:none;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;" contenteditable="true">Get Started</button>
+        </section>`;
+      }
+      return SECTIONS.hero;
+    }
+
+    // Section Templates
+    const SECTIONS = {
+      hero: `
+        <section style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:80px 20px;text-align:center;">
+          <h1 style="font-size:3rem;margin-bottom:20px;font-weight:700;" contenteditable="true">Welcome to Our Site</h1>
+          <p style="font-size:1.2rem;opacity:0.9;max-width:600px;margin:0 auto 30px;" contenteditable="true">Create amazing pages with our easy-to-use builder</p>
+          <button style="background:white;color:#667eea;padding:15px 40px;border:none;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;" contenteditable="true">Get Started</button>
+        </section>
+      `,
+      features: `
+        <section style="padding:60px 20px;max-width:1000px;margin:0 auto;">
+          <h2 style="text-align:center;font-size:2rem;margin-bottom:40px;" contenteditable="true">Our Features</h2>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px;">
+            <div style="text-align:center;padding:30px;">
+              <div style="font-size:3rem;margin-bottom:15px;">⚡</div>
+              <h3 style="margin-bottom:10px;" contenteditable="true">Fast</h3>
+              <p style="color:#6b7280;" contenteditable="true">Lightning fast performance</p>
+            </div>
+            <div style="text-align:center;padding:30px;">
+              <div style="font-size:3rem;margin-bottom:15px;">🛡️</div>
+              <h3 style="margin-bottom:10px;" contenteditable="true">Secure</h3>
+              <p style="color:#6b7280;" contenteditable="true">Enterprise-grade security</p>
+            </div>
+            <div style="text-align:center;padding:30px;">
+              <div style="font-size:3rem;margin-bottom:15px;">💎</div>
+              <h3 style="margin-bottom:10px;" contenteditable="true">Premium</h3>
+              <p style="color:#6b7280;" contenteditable="true">Premium quality service</p>
+            </div>
+          </div>
+        </section>
+      `,
+      cta: `
+        <section style="background:#1f2937;color:white;padding:60px 20px;text-align:center;">
+          <h2 style="font-size:2rem;margin-bottom:15px;" contenteditable="true">Ready to Get Started?</h2>
+          <p style="opacity:0.8;margin-bottom:30px;" contenteditable="true">Join thousands of satisfied customers today</p>
+          <button style="background:#10b981;color:white;padding:15px 40px;border:none;border-radius:30px;font-weight:700;cursor:pointer;" contenteditable="true">Start Free Trial</button>
+        </section>
+      `,
+      text: `
+        <section style="padding:40px 20px;max-width:800px;margin:0 auto;">
+          <h2 style="margin-bottom:20px;" contenteditable="true">About Us</h2>
+          <p style="line-height:1.8;color:#374151;" contenteditable="true">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        </section>
+      `,
+      products: `
+        <section class="widget-section" style="padding:60px 20px;">
+          <div style="max-width:1200px;margin:0 auto;">
+            <h2 style="text-align:center;font-size:2rem;margin-bottom:40px;" contenteditable="true">Our Products</h2>
+            <div class="widget-config" style="background:#f0f9ff;border:2px dashed #3b82f6;border-radius:12px;padding:20px;margin-bottom:20px;">
+              <div style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#1e40af;">
+                  📊 Layout:
+                  <select class="widget-layout" style="padding:8px 12px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                    <option value="grid">Grid</option>
+                    <option value="slider">Slider</option>
+                  </select>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#1e40af;">
+                  🔢 Columns:
+                  <select class="widget-columns" style="padding:8px 12px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                  </select>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#1e40af;">
+                  📦 Limit:
+                  <select class="widget-limit-select" style="padding:8px 12px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                    <option value="3">3</option>
+                    <option value="6" selected>6</option>
+                    <option value="9">9</option>
+                    <option value="12">12</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <input type="number" class="widget-limit-custom" min="1" max="50" placeholder="e.g. 20" style="display:none;width:70px;padding:8px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#1e40af;">
+                  🏷️ Filter:
+                  <select class="widget-filter" style="padding:8px 12px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                    <option value="all">All Products</option>
+                    <option value="featured">Featured Only</option>
+                    <option value="custom">Custom IDs</option>
+                  </select>
+                </label>
+              </div>
+              <div class="widget-custom-ids" style="display:none;margin-top:15px;">
+                <label style="font-size:0.9rem;font-weight:600;color:#1e40af;display:block;margin-bottom:8px;">
+                  🎯 Product IDs (comma separated):
+                </label>
+                <input type="text" class="widget-ids-input" placeholder="e.g. 1, 2, 5, 10 or product-slug-1, product-slug-2" style="width:100%;padding:10px;border:2px solid #3b82f6;border-radius:6px;font-size:0.85rem;">
+                <small style="color:#6b7280;display:block;margin-top:5px;">Enter product IDs or slugs separated by commas</small>
+              </div>
+            </div>
+            <div class="product-widget-container" data-embed='{"type":"product","limit":6,"columns":3,"layout":"grid","filter":"all","ids":[]}'>
+              <p style="text-align:center;color:#6b7280;">Product cards will load here...</p>
+            </div>
+          </div>
+        </section>
+      `,
+      blogs: `
+        <section class="widget-section" style="padding:60px 20px;">
+          <div style="max-width:1200px;margin:0 auto;">
+            <h2 style="text-align:center;font-size:2rem;margin-bottom:40px;" contenteditable="true">Latest Blog Posts</h2>
+            <div class="widget-config" style="background:#f0fdf4;border:2px dashed #10b981;border-radius:12px;padding:20px;margin-bottom:20px;">
+              <div style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#065f46;">
+                  📊 Layout:
+                  <select class="widget-layout" style="padding:8px 12px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                    <option value="grid">Grid</option>
+                    <option value="slider">Slider</option>
+                  </select>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#065f46;">
+                  🔢 Columns:
+                  <select class="widget-columns" style="padding:8px 12px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                  </select>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#065f46;">
+                  📦 Limit:
+                  <select class="widget-limit-select" style="padding:8px 12px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                    <option value="3">3</option>
+                    <option value="6" selected>6</option>
+                    <option value="9">9</option>
+                    <option value="12">12</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <input type="number" class="widget-limit-custom" min="1" max="50" placeholder="e.g. 20" style="display:none;width:70px;padding:8px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:#065f46;">
+                  🏷️ Filter:
+                  <select class="widget-filter" style="padding:8px 12px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                    <option value="all">All Blogs</option>
+                    <option value="custom">Custom IDs</option>
+                  </select>
+                </label>
+              </div>
+              <div class="widget-custom-ids" style="display:none;margin-top:15px;">
+                <label style="font-size:0.9rem;font-weight:600;color:#065f46;display:block;margin-bottom:8px;">
+                  🎯 Blog IDs (comma separated):
+                </label>
+                <input type="text" class="widget-ids-input" placeholder="e.g. 1, 2, 5 or blog-slug-1, blog-slug-2" style="width:100%;padding:10px;border:2px solid #10b981;border-radius:6px;font-size:0.85rem;">
+                <small style="color:#6b7280;display:block;margin-top:5px;">Enter blog IDs or slugs separated by commas</small>
+              </div>
+            </div>
+            <div class="blog-widget-container" data-embed='{"type":"blog","limit":6,"columns":3,"layout":"grid","filter":"all","ids":[]}'>
+              <p style="text-align:center;color:#6b7280;">Blog cards will load here...</p>
+            </div>
+          </div>
+        </section>
+      `,
+      forum: `
+        <section style="padding:60px 20px;">
+          <div style="max-width:1000px;margin:0 auto;">
+            <h2 style="text-align:center;font-size:2rem;margin-bottom:40px;" contenteditable="true">Community Forum</h2>
+            <div id="forum-widget" data-embed='{"type":"forum"}'>
+              <p style="text-align:center;color:#6b7280;">Forum questions will load here...</p>
+            </div>
+          </div>
+        </section>
+      `,
+      footer: `
+        <footer style="background:#1f2937;color:white;padding:40px 20px;text-align:center;">
+          <p style="margin-bottom:10px;" contenteditable="true">© 2024 Your Company. All rights reserved.</p>
+          <p style="opacity:0.7;font-size:0.9rem;" contenteditable="true">Privacy Policy | Terms of Service | Contact</p>
+        </footer>
+      `,
+      custom: `
+        <section style="padding:40px 20px;text-align:center;">
+          <p style="color:#6b7280;" contenteditable="true">Custom HTML section - Click code button to edit</p>
+        </section>
+      `
+    };
+
+    // Full Page Templates
+    const TEMPLATES = {
+      home: {
+        title: 'Home',
+        slug: 'home',
+        type: 'home',
+        sections: ['hero', 'features', 'products', 'cta', 'footer']
+      },
+      blog_archive: {
+        title: 'Blog',
+        slug: 'blog',
+        type: 'blog_archive',
+        content: `
+          <section style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:50px 20px;text-align:center;">
+            <h1 style="font-size:2.5rem;margin-bottom:10px;">📝 Blog</h1>
+            <p style="opacity:0.9;">Latest articles and updates</p>
+          </section>
+          <section style="padding:40px 20px;">
+            <div style="max-width:1200px;margin:0 auto;">
+              <div id="blog-archive-container"></div>
+            </div>
+          </section>
+          <script>
+            if (typeof BlogCards !== 'undefined') {
+              BlogCards.render('blog-archive-container', { limit: 30, pagination: true });
+            }
+          <\/script>
+        `
+      },
+      forum_archive: {
+        title: 'Forum',
+        slug: 'forum',
+        type: 'forum_archive',
+        content: `
+          <section style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;padding:50px 20px;text-align:center;">
+            <h1 style="font-size:2.5rem;margin-bottom:10px;">💬 Community Forum</h1>
+            <p style="opacity:0.9;">Ask questions and share knowledge</p>
+          </section>
+          <section style="padding:40px 20px;">
+            <div style="max-width:1000px;margin:0 auto;">
+              <!-- Questions List -->
+              <div id="forum-questions-container" style="margin-bottom:40px;"></div>
+              
+              <!-- Pagination -->
+              <div id="forum-pagination" style="display:flex;justify-content:center;gap:8px;margin-bottom:30px;"></div>
+              
+              <!-- Ask Question Form at Bottom -->
+              <div id="ask-question-box" style="background:white;border-radius:16px;padding:30px;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+                <h3 style="margin-bottom:20px;">❓ Ask a Question</h3>
+                <form id="quick-ask-form" style="display:flex;flex-direction:column;gap:15px;">
+                  <input type="text" id="q-name" placeholder="Your Name" required style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:1rem;">
+                  <input type="email" id="q-email" placeholder="Your Email" required style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:1rem;">
+                  <input type="text" id="q-title" placeholder="Question Title" required style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:1rem;">
+                  <textarea id="q-content" placeholder="Describe your question in detail..." rows="4" required style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:1rem;resize:vertical;"></textarea>
+                  <button type="submit" style="background:#10b981;color:white;padding:14px;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">Submit Question</button>
+                  <div id="ask-message" style="display:none;padding:12px;border-radius:8px;text-align:center;"></div>
+                </form>
+              </div>
+            </div>
+          </section>
+          <script>
+            var currentPage = 1;
+            var totalPages = 1;
+            
+            document.getElementById('quick-ask-form').addEventListener('submit', async function(e) {
+              e.preventDefault();
+              const msg = document.getElementById('ask-message');
+              const btn = this.querySelector('button[type="submit"]');
+              const data = {
+                name: document.getElementById('q-name').value.trim(),
+                email: document.getElementById('q-email').value.trim(),
+                title: document.getElementById('q-title').value.trim(),
+                content: document.getElementById('q-content').value.trim()
+              };
+              if (!data.name || !data.email || !data.title || !data.content) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#991b1b';
+                msg.textContent = 'Please fill all fields';
+                return;
+              }
+              btn.disabled = true;
+              btn.textContent = 'Submitting...';
+              try {
+                const res = await fetch('/api/forum/submit-question', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                  msg.style.display = 'block';
+                  msg.style.background = '#d1fae5';
+                  msg.style.color = '#065f46';
+                  msg.textContent = '✅ Question submitted! It will appear after approval.';
+                  this.reset();
+                } else {
+                  msg.style.display = 'block';
+                  msg.style.background = '#fee2e2';
+                  msg.style.color = '#991b1b';
+                  msg.textContent = result.error || 'Failed to submit';
+                }
+              } catch (err) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#991b1b';
+                msg.textContent = 'Error. Please try again.';
+              }
+              btn.disabled = false;
+              btn.textContent = 'Submit Question';
+            });
+            
+            async function loadForumQuestions(page) {
+              currentPage = page || 1;
+              const container = document.getElementById('forum-questions-container');
+              container.innerHTML = '<p style="text-align:center;color:#6b7280;padding:20px;">Loading questions...</p>';
+              try {
+                const res = await fetch('/api/forum/questions?limit=20&page=' + currentPage);
+                const data = await res.json();
+                if (data.questions && data.questions.length > 0) {
+                  totalPages = data.pagination.totalPages || 1;
+                  container.innerHTML = '<h3 style="margin-bottom:20px;color:#1f2937;">Recent Questions</h3>' + data.questions.map(q => {
+                    var preview = (q.content || '').substring(0, 150);
+                    if ((q.content || '').length > 150) preview += '...';
+                    return '<a href="/forum/' + encodeURIComponent(q.slug || q.id) + '" style="display:block;background:white;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform=\\'translateY(-2px)\\';this.style.boxShadow=\\'0 4px 15px rgba(0,0,0,0.1)\\';" onmouseout="this.style.transform=\\'none\\';this.style.boxShadow=\\'0 2px 8px rgba(0,0,0,0.06)\\';"><h4 style="color:#1f2937;margin-bottom:8px;font-size:1.1rem;">' + escapeHtml(q.title) + '</h4><p style="color:#6b7280;font-size:0.9rem;line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + escapeHtml(preview) + '</p><div style="display:flex;gap:15px;font-size:0.85rem;color:#9ca3af;"><span>👤 ' + escapeHtml(q.name) + '</span><span>💬 ' + (q.reply_count || 0) + ' replies</span></div></a>';
+                  }).join('');
+                  renderPagination();
+                } else {
+                  container.innerHTML = '<p style="text-align:center;color:#6b7280;padding:40px;background:white;border-radius:12px;">No questions yet. Be the first to ask!</p>';
+                  document.getElementById('forum-pagination').innerHTML = '';
+                }
+              } catch (e) { 
+                container.innerHTML = '<p style="text-align:center;color:#ef4444;">Error loading questions</p>'; 
+              }
+            }
+            
+            function renderPagination() {
+              var pag = document.getElementById('forum-pagination');
+              if (totalPages <= 1) { pag.innerHTML = ''; return; }
+              var html = '';
+              if (currentPage > 1) {
+                html += '<button onclick="loadForumQuestions(' + (currentPage-1) + ')" style="padding:8px 16px;border:1px solid #e5e7eb;background:white;border-radius:8px;cursor:pointer;">← Prev</button>';
+              }
+              for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                  html += '<button style="padding:8px 16px;border:none;background:#10b981;color:white;border-radius:8px;">' + i + '</button>';
+                } else if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                  html += '<button onclick="loadForumQuestions(' + i + ')" style="padding:8px 16px;border:1px solid #e5e7eb;background:white;border-radius:8px;cursor:pointer;">' + i + '</button>';
+                } else if (Math.abs(i - currentPage) === 3) {
+                  html += '<span style="padding:8px;">...</span>';
+                }
+              }
+              if (currentPage < totalPages) {
+                html += '<button onclick="loadForumQuestions(' + (currentPage+1) + ')" style="padding:8px 16px;border:1px solid #e5e7eb;background:white;border-radius:8px;cursor:pointer;">Next →</button>';
+              }
+              pag.innerHTML = html;
+            }
+            
+            function escapeHtml(t) { if(!t)return ''; var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+            loadForumQuestions(1);
+          <\/script>
+        `
+      },
+      product_grid: {
+        title: 'Products',
+        slug: 'products',
+        type: 'product_grid',
+        content: `
+          <section style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;padding:50px 20px;text-align:center;">
+            <h1 style="font-size:2.5rem;margin-bottom:10px;">🛒 Our Products</h1>
+            <p style="opacity:0.9;">Browse our amazing collection</p>
+          </section>
+          <section style="padding:40px 20px;">
+            <div style="max-width:1200px;margin:0 auto;">
+              <div id="products-grid-container"></div>
+            </div>
+          </section>
+          <script>
+            if (typeof ProductCards !== 'undefined') {
+              ProductCards.render('products-grid-container', { limit: 30 });
+            }
+          <\/script>
+        `
+      }
+    };
+
+    // Advanced templates library (page-focused)
+    const ADVANCED_TEMPLATES = {
+      home: {
+        title: 'Home',
+        slug: 'home',
+        type: 'home',
+        content: `
+          <section style="background:radial-gradient(900px 420px at 20% 0%,#f59e0b 0%,#ef4444 45%,#111827 100%);color:white;padding:82px 20px;">
+            <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.2fr 0.8fr;gap:18px;align-items:center;">
+              <div>
+                <p style="display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.16);margin:0 0 12px;font-size:0.85rem;letter-spacing:0.04em;" contenteditable="true">PERSONALIZED VIDEO WISHES</p>
+                <h1 style="font-size:clamp(2rem,4vw,3.3rem);margin:0 0 12px;line-height:1.12;" contenteditable="true">Make every celebration unforgettable</h1>
+                <p style="margin:0 0 22px;opacity:0.92;max-width:620px;line-height:1.7;" contenteditable="true">Custom birthday, anniversary and surprise videos delivered with premium quality and fast turnaround.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                  <a href="#home-products" style="background:white;color:#111827;padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none;">Start Custom Order</a>
+                  <a href="/forum" style="background:transparent;color:white;padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.45);">Ask Questions</a>
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:18px;padding:20px;display:grid;gap:10px;">
+                <div style="display:flex;justify-content:space-between;"><span>Average delivery</span><strong>24-72 hours</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Video quality</span><strong>HD 1080p</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Personalization</span><strong>100% custom</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Support</span><strong>24/7 help</strong></div>
+              </div>
+            </div>
+          </section>
+          <section style="padding:34px 20px;background:#fff;">
+            <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+              <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:16px;"><strong style="display:block;font-size:1.4rem;color:#9a3412;">500+</strong><span style="color:#7c2d12;">Completed wishes</span></div>
+              <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:16px;"><strong style="display:block;font-size:1.4rem;color:#1d4ed8;">4.9/5</strong><span style="color:#1e3a8a;">Client satisfaction</span></div>
+              <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:16px;"><strong style="display:block;font-size:1.4rem;color:#047857;">50+</strong><span style="color:#065f46;">Occasions covered</span></div>
+              <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:16px;"><strong style="display:block;font-size:1.4rem;color:#6d28d9;">Global</strong><span style="color:#5b21b6;">Worldwide delivery</span></div>
+            </div>
+          </section>
+          <section id="home-products" style="padding:66px 20px;background:white;">
+            <div style="max-width:1200px;margin:0 auto;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
+                <div>
+                  <h2 style="margin:0 0 8px;font-size:2rem;" contenteditable="true">Featured offerings</h2>
+                  <p style="margin:0;color:#6b7280;" contenteditable="true">Premium templates for birthdays and surprise reveals</p>
+                </div>
+                <a href="/products" style="text-decoration:none;font-weight:700;color:#ea580c;">See all products</a>
+              </div>
+              <div id="home-featured-products"></div>
+            </div>
+          </section>
+          <script>
+            if (typeof ProductCards !== 'undefined') {
+              ProductCards.render('home-featured-products', { limit: 8, layout: 'grid', columns: 4 });
+            }
+          <\/script>
+        `
+      },
+      blog_archive: {
+        title: 'Blog',
+        slug: 'blog',
+        type: 'blog_archive',
+        content: `
+          <section style="background:linear-gradient(130deg,#111827 0%,#1d4ed8 60%,#06b6d4 100%);color:white;padding:72px 20px;">
+            <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;align-items:center;">
+              <div>
+                <p style="font-size:0.82rem;letter-spacing:0.04em;margin:0 0 10px;opacity:0.85;" contenteditable="true">INSIGHTS AND STORYTELLING</p>
+                <h1 style="font-size:clamp(2rem,3.8vw,3.1rem);margin:0 0 12px;" contenteditable="true">Ideas to craft unforgettable wishes</h1>
+                <p style="margin:0;opacity:0.92;line-height:1.7;max-width:580px;" contenteditable="true">Publishing strategy, scripts and occasion tips to help your brand convert better.</p>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.2);display:flex;flex-wrap:wrap;gap:8px;">
+                <span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.14);">Birthday ideas</span>
+                <span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.14);">Video scripts</span>
+                <span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.14);">Customer stories</span>
+              </div>
+            </div>
+          </section>
+          <section style="padding:62px 20px;background:#f8fafc;">
+            <div style="max-width:1200px;margin:0 auto;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
+                <h2 style="margin:0;font-size:1.9rem;" contenteditable="true">Latest articles</h2>
+                <p style="margin:0;color:#6b7280;" contenteditable="true">Fresh content for creators and buyers</p>
+              </div>
+              <div id="blog-archive-container"></div>
+            </div>
+          </section>
+          <script>
+            if (typeof BlogCards !== 'undefined') {
+              BlogCards.render('blog-archive-container', { limit: 12, pagination: true, columns: 3, layout: 'grid' });
+            }
+          <\/script>
+        `
+      },
+      product_grid: {
+        title: 'Products',
+        slug: 'products',
+        type: 'product_grid',
+        content: `
+          <section style="background:linear-gradient(120deg,#7c2d12 0%,#ea580c 55%,#f97316 100%);color:white;padding:76px 20px;">
+            <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;align-items:center;">
+              <div>
+                <p style="font-size:0.82rem;letter-spacing:0.05em;margin:0 0 10px;opacity:0.85;" contenteditable="true">PRODUCT CATALOG</p>
+                <h1 style="font-size:clamp(2rem,3.8vw,3.1rem);margin:0 0 12px;" contenteditable="true">Choose the perfect custom video package</h1>
+                <p style="margin:0;opacity:0.9;line-height:1.7;max-width:620px;" contenteditable="true">From quick shout-outs to premium story-led videos with add-ons and rush delivery.</p>
+              </div>
+              <div style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);border-radius:18px;padding:18px;display:grid;gap:10px;">
+                <div style="display:flex;justify-content:space-between;"><span>Formats</span><strong>Vertical + Horizontal</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Add-ons</span><strong>Music, subtitles, branding</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Support</span><strong>Revision available</strong></div>
+              </div>
+            </div>
+          </section>
+          <section style="padding:66px 20px;background:white;">
+            <div style="max-width:1200px;margin:0 auto;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
+                <h2 style="margin:0;font-size:2rem;" contenteditable="true">All packages</h2>
+                <p style="margin:0;color:#6b7280;" contenteditable="true">Pick a package and customize from checkout add-ons</p>
+              </div>
+              <div id="products-grid-container"></div>
+            </div>
+          </section>
+          <script>
+            if (typeof ProductCards !== 'undefined') {
+              ProductCards.render('products-grid-container', { limit: 24, layout: 'grid', columns: 4 });
+            }
+          <\/script>
+        `
+      },
+      occasion_campaign: {
+        title: 'Birthday Wishes Landing',
+        slug: 'birthday-wishes',
+        type: 'custom',
+        content: `
+          <section style="background:linear-gradient(120deg,#ec4899 0%,#f97316 45%,#facc15 100%);padding:86px 20px;color:white;text-align:center;">
+            <h1 style="font-size:clamp(2rem,4vw,3.2rem);margin:0 0 14px;" contenteditable="true">Birthday video wishes that feel truly personal</h1>
+            <p style="max-width:720px;margin:0 auto 24px;line-height:1.7;" contenteditable="true">Turn every birthday into a share-worthy memory with premium templates and expressive storytelling.</p>
+            <a href="/products" style="display:inline-block;background:white;color:#be185d;padding:13px 22px;border-radius:999px;font-weight:700;text-decoration:none;">Explore Birthday Packages</a>
+          </section>
+        `
+      },
+      about_story: {
+        title: 'About Us',
+        slug: 'about-us',
+        type: 'custom',
+        content: `
+          <section style="padding:84px 20px;background:linear-gradient(120deg,#0f172a 0%,#1e293b 45%,#334155 100%);color:white;">
+            <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px;align-items:center;">
+              <div>
+                <h1 style="font-size:clamp(2rem,4vw,3.1rem);margin:0 0 14px;" contenteditable="true">We create personalized videos that connect people</h1>
+                <p style="margin:0;opacity:0.9;line-height:1.7;" contenteditable="true">Our mission is to make every celebration message look cinematic, personal and unforgettable.</p>
+              </div>
+              <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:18px;padding:20px;">
+                <p style="margin:0 0 10px;">Founded for premium personalization</p>
+                <p style="margin:0 0 10px;">Built for birthdays, events and business greetings</p>
+                <p style="margin:0;">Powered by fast support and quality control</p>
+              </div>
+            </div>
+          </section>
+        `
+      },
+      faq_contact: {
+        title: 'FAQ and Contact',
+        slug: 'contact-support',
+        type: 'custom',
+        content: `
+          <section style="padding:72px 20px;background:linear-gradient(120deg,#1d4ed8 0%,#2563eb 55%,#0ea5e9 100%);color:white;text-align:center;">
+            <h1 style="font-size:clamp(2rem,4vw,3rem);margin:0 0 12px;" contenteditable="true">Questions? We are here to help</h1>
+            <p style="max-width:760px;margin:0 auto;line-height:1.7;opacity:0.92;" contenteditable="true">Delivery times, add-ons, revisions and special requests answered in one place.</p>
+          </section>
+          <section style="padding:64px 20px;background:white;">
+            <div style="max-width:960px;margin:0 auto;display:grid;gap:12px;">
+              <div style="border:1px solid #dbeafe;border-radius:14px;padding:18px;"><h3 style="margin:0 0 8px;">How long is delivery?</h3><p style="margin:0;color:#6b7280;line-height:1.6;" contenteditable="true">Standard delivery is 24-72 hours depending on package and add-ons.</p></div>
+              <div style="border:1px solid #dbeafe;border-radius:14px;padding:18px;"><h3 style="margin:0 0 8px;">Can I request revisions?</h3><p style="margin:0;color:#6b7280;line-height:1.6;" contenteditable="true">Yes, revision policy depends on package tier and change scope.</p></div>
+              <div style="border:1px solid #dbeafe;border-radius:14px;padding:18px;"><h3 style="margin:0 0 8px;">Do you support rush orders?</h3><p style="margin:0;color:#6b7280;line-height:1.6;" contenteditable="true">Yes, rush add-on is available for urgent celebrations.</p></div>
+            </div>
+          </section>
+        `
+      },
+      creator_profile: {
+        title: 'Creator Profile',
+        slug: 'our-creator',
+        type: 'custom',
+        content: `
+          <section style="padding:82px 20px;background:linear-gradient(120deg,#1f2937 0%,#111827 40%,#0f172a 100%);color:white;">
+            <div style="max-width:1050px;margin:0 auto;display:grid;grid-template-columns:0.9fr 1.1fr;gap:20px;align-items:center;">
+              <div style="background:#374151;border-radius:22px;min-height:320px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#d1d5db;">Replace with creator image/video preview</div>
+              <div>
+                <p style="margin:0 0 8px;opacity:0.8;" contenteditable="true">FEATURED CREATOR</p>
+                <h1 style="margin:0 0 12px;font-size:clamp(2rem,3.8vw,3rem);" contenteditable="true">Your performer profile headline</h1>
+                <p style="margin:0 0 16px;line-height:1.7;opacity:0.9;" contenteditable="true">Use this page to show style, voice options, language strengths and proof clips for buyer confidence.</p>
+              </div>
+            </div>
+          </section>
+        `
+      }
+    };
+    Object.assign(TEMPLATES, ADVANCED_TEMPLATES);
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCanvasEmptyState();
+      loadCurrentDefaults();
+
+      const slugInput = document.getElementById('seo-slug');
+      const defaultCheckbox = document.getElementById('is-default');
+      if (slugInput) {
+        slugInput.addEventListener('input', () => {
+          if (!slugInput.readOnly) {
+            previousEditableSlug = slugInput.value.trim();
+          }
+        });
+      }
+      if (defaultCheckbox) {
+        defaultCheckbox.addEventListener('change', () => {
+          syncSlugField();
+        });
+      }
+      syncSlugField();
+
+      const params = new URLSearchParams(window.location.search);
+      const editPage = params.get('edit');
+      if (editPage) loadExistingPage(editPage);
+    });
+
+    // Feature image preview
+    document.getElementById('feature-image-file').addEventListener('change', function() {
+      const preview = document.getElementById('feature-preview');
+      const urlInput = document.getElementById('feature_image_url');
+      if (this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.innerHTML = `<img src="${e.target.result}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;">`;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
+    document.getElementById('feature_image_url').addEventListener('input', function() {
+      const preview = document.getElementById('feature-preview');
+      if (this.value) {
+        preview.innerHTML = `<img src="${this.value}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none';">`;
+        preview.style.display = 'block';
+      } else { preview.style.display = 'none'; }
+    });
+
+    // Load Template
+    function loadTemplate(type) {
+      if (!confirm('Load ' + type + ' template? This will replace current content.')) return;
+      
+      const canvas = document.getElementById('builder-canvas');
+      const template = TEMPLATES[type];
+      if (!template) return;
+      
+      document.getElementById('seo-title').value = template.title;
+      document.getElementById('seo-slug').value = template.slug;
+      setPageType(template.type);
+      
+      canvas.innerHTML = '';
+      
+      if (template.content) {
+        const wrapper = createSectionWrapper();
+        wrapper.innerHTML = template.content + createControls();
+        canvas.appendChild(wrapper);
+      } else if (template.sections) {
+        template.sections.forEach(sectionType => addSection(sectionType));
+      }
+      
+      updateCanvasEmptyState();
+    }
+
+    // Add Section
+    function addSection(type) {
+      const canvas = document.getElementById('builder-canvas');
+      const wrapper = createSectionWrapper();
+      const sectionHtml = type === 'hero' ? getHeroSection() : SECTIONS[type];
+      wrapper.innerHTML = sectionHtml + createControls();
+      canvas.appendChild(wrapper);
+      enableEditing(wrapper);
+      updateCanvasEmptyState();
+      initDynamicWidgets(wrapper);
+    }
+
+    function createSectionWrapper() {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'section-wrapper';
+      return wrapper;
+    }
+
+    function createControls() {
+      return `
+        <div class="section-controls">
+          <button onclick="moveSection(this.closest('.section-wrapper'), -1)" title="Move Up">↑</button>
+          <button onclick="moveSection(this.closest('.section-wrapper'), 1)" title="Move Down">↓</button>
+          <button onclick="editCode(this.closest('.section-wrapper'))" title="Edit Code">&lt;/&gt;</button>
+          <button onclick="duplicateSection(this.closest('.section-wrapper'))" title="Duplicate">📋</button>
+          <button onclick="deleteSection(this.closest('.section-wrapper'))" title="Delete">🗑️</button>
+        </div>
+      `;
+    }
+
+    function enableEditing(wrapper) {
+      wrapper.querySelectorAll('[contenteditable]').forEach(el => {
+        el.addEventListener('focus', () => { el.style.outline = '2px solid #3b82f6'; el.style.outlineOffset = '2px'; });
+        el.addEventListener('blur', () => { el.style.outline = 'none'; });
+      });
+    }
+
+    function initDynamicWidgets(wrapper) {
+      // Setup custom limit input toggle
+      setupLimitCustomInput(wrapper);
+
+      // Product widget
+      const productWidget = wrapper.querySelector('.product-widget-container[data-embed*="product"]');
+      if (productWidget && typeof ProductCards !== 'undefined') {
+        const containerId = 'pc-' + Date.now();
+        productWidget.id = containerId;
+        const config = getWidgetConfig(wrapper, 'product');
+        renderProductWidget(containerId, config);
+
+        // Listen for config changes
+        const configPanel = wrapper.querySelector('.widget-config');
+        if (configPanel) {
+          configPanel.querySelectorAll('select, input').forEach(el => {
+            el.addEventListener('change', () => {
+              const newConfig = getWidgetConfig(wrapper, 'product');
+              updateWidgetDataEmbed(productWidget, newConfig);
+              renderProductWidget(containerId, newConfig);
+            });
+          });
+        }
+      }
+
+      // Blog widget
+      const blogWidget = wrapper.querySelector('.blog-widget-container[data-embed*="blog"]');
+      if (blogWidget && typeof BlogCards !== 'undefined') {
+        const containerId = 'bc-' + Date.now();
+        blogWidget.id = containerId;
+        const config = getWidgetConfig(wrapper, 'blog');
+        renderBlogWidget(containerId, config);
+
+        // Listen for config changes
+        const configPanel = wrapper.querySelector('.widget-config');
+        if (configPanel) {
+          configPanel.querySelectorAll('select, input').forEach(el => {
+            el.addEventListener('change', () => {
+              const newConfig = getWidgetConfig(wrapper, 'blog');
+              updateWidgetDataEmbed(blogWidget, newConfig);
+              renderBlogWidget(containerId, newConfig);
+            });
+          });
+        }
+      }
+    }
+
+    function getWidgetConfig(wrapper, type) {
+      const configPanel = wrapper.querySelector('.widget-config');
+      if (!configPanel) return { limit: 6, columns: 3, layout: 'grid', filter: 'all' };
+
+      const layout = configPanel.querySelector('.widget-layout')?.value || 'grid';
+      const columns = parseInt(configPanel.querySelector('.widget-columns')?.value || '3');
+      const filter = configPanel.querySelector('.widget-filter')?.value || 'all';
+
+      // Handle custom limit
+      const limitSelect = configPanel.querySelector('.widget-limit-select');
+      const limitCustom = configPanel.querySelector('.widget-limit-custom');
+      let limit = 6;
+      if (limitSelect) {
+        if (limitSelect.value === 'custom' && limitCustom) {
+          limit = parseInt(limitCustom.value) || 6;
+        } else {
+          limit = parseInt(limitSelect.value) || 6;
+        }
+      }
+
+      // Handle custom IDs
+      const idsInput = configPanel.querySelector('.widget-ids-input');
+      let ids = [];
+      if (filter === 'custom' && idsInput && idsInput.value.trim()) {
+        ids = idsInput.value.split(',').map(id => id.trim()).filter(id => id);
+      }
+
+      return { type, limit, columns, layout, filter, ids };
+    }
+
+    function setupLimitCustomInput(wrapper) {
+      const configPanel = wrapper.querySelector('.widget-config');
+      if (!configPanel) return;
+
+      // Limit custom input toggle
+      const limitSelect = configPanel.querySelector('.widget-limit-select');
+      const limitCustom = configPanel.querySelector('.widget-limit-custom');
+      if (limitSelect && limitCustom) {
+        limitSelect.addEventListener('change', function() {
+          if (this.value === 'custom') {
+            limitCustom.style.display = 'block';
+            limitCustom.focus();
+          } else {
+            limitCustom.style.display = 'none';
+          }
+        });
+      }
+
+      // Filter custom IDs toggle
+      const filterSelect = configPanel.querySelector('.widget-filter');
+      const customIdsDiv = configPanel.querySelector('.widget-custom-ids');
+      if (filterSelect && customIdsDiv) {
+        filterSelect.addEventListener('change', function() {
+          if (this.value === 'custom') {
+            customIdsDiv.style.display = 'block';
+          } else {
+            customIdsDiv.style.display = 'none';
+          }
+        });
+      }
+    }
+
+    function updateWidgetDataEmbed(widget, config) {
+      widget.setAttribute('data-embed', JSON.stringify(config));
+    }
+
+    function renderProductWidget(containerId, config) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '<p style="text-align:center;color:#6b7280;padding:20px;">Loading products...</p>';
+
+      setTimeout(() => {
+        if (typeof ProductCards !== 'undefined') {
+          const opts = {
+            limit: config.limit,
+            columns: config.columns,
+            filter: config.filter,
+            ids: config.ids || []
+          };
+          if (config.layout === 'slider' && ProductCards.renderSlider) {
+            ProductCards.renderSlider(containerId, opts);
+          } else {
+            ProductCards.render(containerId, opts);
+          }
+        }
+      }, 100);
+    }
+
+    function renderBlogWidget(containerId, config) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '<p style="text-align:center;color:#6b7280;padding:20px;">Loading blogs...</p>';
+
+      setTimeout(() => {
+        if (typeof BlogCards !== 'undefined') {
+          const opts = {
+            limit: config.limit,
+            columns: config.columns,
+            showPagination: false,
+            ids: config.ids || []
+          };
+          if (config.layout === 'slider' && BlogCards.renderSlider) {
+            BlogCards.renderSlider(containerId, opts);
+          } else {
+            BlogCards.render(containerId, opts);
+          }
+        }
+      }, 100);
+    }
+
+    // Section Actions
+    function moveSection(wrapper, direction) {
+      const canvas = document.getElementById('builder-canvas');
+      const sections = Array.from(canvas.querySelectorAll('.section-wrapper'));
+      const index = sections.indexOf(wrapper);
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= sections.length) return;
+      if (direction < 0) canvas.insertBefore(wrapper, sections[newIndex]);
+      else canvas.insertBefore(sections[newIndex], wrapper);
+    }
+
+    function duplicateSection(wrapper) {
+      const clone = wrapper.cloneNode(true);
+      wrapper.parentNode.insertBefore(clone, wrapper.nextSibling);
+      enableEditing(clone);
+      initDynamicWidgets(clone);
+    }
+
+    function deleteSection(wrapper) {
+      if (!confirm('Delete this section?')) return;
+      wrapper.remove();
+      updateCanvasEmptyState();
+    }
+
+    function editCode(wrapper) {
+      editingSection = wrapper;
+      const content = Array.from(wrapper.children)
+        .filter(child => !child.classList.contains('section-controls'))
+        .map(child => child.outerHTML).join('\n');
+      document.getElementById('code-editor').value = content;
+      document.getElementById('code-modal').classList.add('active');
+    }
+
+    function closeCodeModal() {
+      document.getElementById('code-modal').classList.remove('active');
+      editingSection = null;
+    }
+
+    function saveCode() {
+      if (!editingSection) return;
+      const code = document.getElementById('code-editor').value;
+      const preserveCustomCode = document.getElementById('preserve-custom-code').checked;
+
+      editingSection.innerHTML = code + createControls();
+      enableEditing(editingSection);
+
+      // Only re-init widgets if user unchecked "Preserve Custom Code"
+      // OR if there's a widget-config panel that needs event listeners
+      if (!preserveCustomCode) {
+        initDynamicWidgets(editingSection);
+      } else {
+        // Still setup event listeners for widget-config if present
+        const hasWidgetConfig = editingSection.querySelector('.widget-config');
+        if (hasWidgetConfig) {
+          setupLimitCustomInput(editingSection);
+        }
+      }
+
+      closeCodeModal();
+    }
+
+    // Page Type
+    function shouldUseRootHomepageUrl() {
+      return currentPageType === 'home' && document.getElementById('is-default').checked;
+    }
+
+    function syncSlugField() {
+      const slugInput = document.getElementById('seo-slug');
+      if (!slugInput) return;
+
+      if (shouldUseRootHomepageUrl()) {
+        const currentValue = slugInput.value.trim();
+        if (currentValue && currentValue !== '/') {
+          previousEditableSlug = currentValue;
+        }
+        slugInput.value = '/';
+        slugInput.readOnly = true;
+        slugInput.placeholder = '/';
+        slugInput.title = 'Default Home page always publishes at root URL /';
+        slugInput.style.background = '#f3f4f6';
+      } else {
+        const wasLocked = slugInput.readOnly;
+        slugInput.readOnly = false;
+        slugInput.placeholder = 'my-awesome-page';
+        slugInput.title = '';
+        slugInput.style.background = '';
+
+        if (wasLocked && slugInput.value.trim() === '/') {
+          const fallbackSlug = previousEditableSlug || (originalPageSlug && originalPageSlug !== 'home' ? originalPageSlug : 'home');
+          slugInput.value = fallbackSlug;
+        }
+      }
+    }
+
+    function setPageType(type) {
+      currentPageType = type;
+      document.querySelectorAll('.type-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.type === type);
+      });
+      const info = document.getElementById('default-info');
+      if (type === 'custom') {
+        info.style.display = 'none';
+        document.getElementById('is-default').checked = false;
+        document.getElementById('is-default').disabled = true;
+      } else {
+        info.style.display = 'block';
+        info.textContent = `When set as default, this page will be used as the main ${type.replace('_', ' ')} page.`;
+        document.getElementById('is-default').disabled = false;
+      }
+      syncSlugField();
+    }
+
+    // Load Current Defaults
+    async function loadCurrentDefaults() {
+      const container = document.getElementById('defaults-list');
+      const types = ['home', 'blog_archive', 'forum_archive', 'product_grid'];
+      let html = '';
+      for (const type of types) {
+        try {
+          const res = await fetch(`/api/pages/default?type=${type}`);
+          const data = await res.json();
+          const label = type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+          const icon = type === 'home' ? '🏠' : type === 'blog_archive' ? '📝' : type === 'forum_archive' ? '💬' : '🛒';
+          if (data.page) {
+            const publicUrl = data.page.public_url || (type === 'home' ? '/' : `/${data.page.slug}`);
+            html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+              <span>${icon}</span><span style="flex:1;font-weight:600;">${label}</span>
+              <span style="color:var(--success);font-size:0.8rem;">${publicUrl}</span>
+            </div>`;
+          } else {
+            html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+              <span>${icon}</span><span style="flex:1;">${label}</span>
+              <span style="color:var(--gray);font-size:0.8rem;">Not set</span>
+            </div>`;
+          }
+        } catch (e) { console.error('Error loading default for', type); }
+      }
+      container.innerHTML = html || '<p style="color:var(--gray);">No defaults set</p>';
+    }
+
+    function updateCanvasEmptyState() {
+      const canvas = document.getElementById('builder-canvas');
+      const hasSections = canvas.querySelectorAll('.section-wrapper').length > 0;
+      canvas.classList.toggle('empty', !hasSections);
+    }
+
+    function generateOutputHtml() {
+      // Group each section-wrapper into a single container so that custom code
+      // containing multiple top-level elements remains intact on reload. Without
+      // grouping, each child element becomes its own section on load, which
+      // causes the layout to break. Each group will be wrapped in a
+      // <div data-section="true"> for later identification during load.
+      const parts = [];
+      document.querySelectorAll('#builder-canvas .section-wrapper').forEach(wrapper => {
+        // Clone the wrapper to safely manipulate its children
+        const cloneWrapper = wrapper.cloneNode(true);
+        // Remove control buttons from the clone
+        cloneWrapper.querySelectorAll('.section-controls').forEach(el => el.remove());
+        // Strip builder-only attributes and UI elements
+        cloneWrapper.querySelectorAll('[contenteditable]').forEach(el => {
+          el.removeAttribute('contenteditable');
+          el.style.outline = '';
+          el.style.outlineOffset = '';
+        });
+        cloneWrapper.querySelectorAll('.widget-config').forEach(el => el.remove());
+        // Clean up widget container IDs and clear preview content
+        cloneWrapper.querySelectorAll('.product-widget-container, .blog-widget-container').forEach(el => {
+          el.removeAttribute('id');
+          el.innerHTML = '';
+        });
+        // Wrap the entire clone contents in a container element with a marker
+        const sectionHTML = `<div data-section="true">${cloneWrapper.innerHTML}</div>`;
+        parts.push(sectionHTML);
+      });
+      return parts.join('\n');
+    }
+
+    // Save Page
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      const title = document.getElementById('seo-title').value.trim();
+      let slug = document.getElementById('seo-slug').value.trim();
+      const desc = document.getElementById('seo-desc').value.trim();
+      const isDefault = document.getElementById('is-default').checked;
+      const useRootHomepageUrl = currentPageType === 'home' && isDefault;
+
+      const saveBtn = document.getElementById('save-btn');
+      const originalText = saveBtn.textContent; saveBtn.textContent = '⏳ Saving...'; saveBtn.disabled = true;
+      while (typeof window.isUploadInProgress === 'function' && window.isUploadInProgress()) { await new Promise(r => setTimeout(r, 200)); }
+      let featureImageUrl = document.getElementById('feature_image_url').value.trim();
+      if (typeof window.getUploadedFiles === 'function') {
+        const uploads = window.getUploadedFiles(); if (uploads['feature-image-file']) featureImageUrl = uploads['feature-image-file'];
+      }
+
+      if (!title) {
+        // Restore button state before exiting due to validation failure
+        alert('Please enter a Page Title');
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        return;
+      }
+      if (useRootHomepageUrl) {
+        slug = '/';
+        document.getElementById('seo-slug').value = '/';
+      } else if (!slug) {
+        slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        document.getElementById('seo-slug').value = slug;
+      }
+      
+      const html = generateOutputHtml();
+      const ogImageMeta = featureImageUrl ? `\n  <meta property="og:image" content="${featureImageUrl}">` : '';
+      const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <meta name="description" content="${desc.replace(/"/g, '&quot;')}">${ogImageMeta}
+  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/css/style.css"></noscript>
+  <script defer src="/js/product-cards.js"><\/script>
+  <script defer src="/js/blog-cards.js"><\/script>
+ </head>
+ <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${html}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-embed*="product"]').forEach(function(el, i) {
+    if (typeof ProductCards !== 'undefined') {
+      var cid = 'pc-' + i + '-' + Date.now();
+      el.id = cid;
+      var config = {limit:6,columns:3,filter:'all',layout:'grid'};
+      try { config = Object.assign(config, JSON.parse(el.getAttribute('data-embed'))); } catch(e) {}
+      if (config.layout === 'slider') {
+        ProductCards.renderSlider ? ProductCards.renderSlider(cid, config) : ProductCards.render(cid, config);
+      } else {
+        ProductCards.render(cid, config);
+      }
+    }
+  });
+  document.querySelectorAll('[data-embed*="blog"]').forEach(function(el, i) {
+    if (typeof BlogCards !== 'undefined') {
+      var cid = 'bc-' + i + '-' + Date.now();
+      el.id = cid;
+      var config = {limit:6,columns:3,layout:'grid'};
+      try { config = Object.assign(config, JSON.parse(el.getAttribute('data-embed'))); } catch(e) {}
+      if (config.layout === 'slider') {
+        BlogCards.renderSlider ? BlogCards.renderSlider(cid, config) : BlogCards.render(cid, config);
+      } else {
+        BlogCards.render(cid, {limit:config.limit,columns:config.columns,showPagination:false});
+      }
+    }
+  });
+});
+<\/script>
+</body>
+</html>`;
+
+      try {
+        const payload = {
+          title: title,
+          slug: slug,
+          content: fullHTML,
+          meta_description: desc,
+          page_type: currentPageType,
+          is_default: isDefault && currentPageType !== 'custom',
+          feature_image_url: featureImageUrl,
+          status: 'published'
+        };
+        if (editingPageId) {
+          payload.id = editingPageId;
+        } else if (originalPageSlug) {
+          payload.original_slug = originalPageSlug;
+        }
+
+        // Save full page using /api/page/save so that title and meta description are persisted
+        const res = await fetch('/api/page/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        // Restore button state regardless of outcome
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        if (data.success) {
+          // Use slug returned from API if available (handles uniqueness)
+          const savedSlug = data.slug || slug;
+          const publicUrl = data.public_url || (useRootHomepageUrl ? '/' : `/${savedSlug}`);
+          if (data.id) editingPageId = Number(data.id);
+          originalPageSlug = savedSlug;
+          previousEditableSlug = savedSlug;
+          document.getElementById('seo-slug').value = useRootHomepageUrl ? '/' : savedSlug;
+          syncSlugField();
+          alert(`✅ Page saved!
+
+URL: ${window.location.origin}${publicUrl}`);
+          loadCurrentDefaults();
+        } else {
+          alert('❌ Save failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        alert('❌ Error: ' + err.message);
+      }
+    });
+
+    // Preview
+    document.getElementById('preview-btn').addEventListener('click', () => {
+      const html = generateOutputHtml();
+      const title = document.getElementById('seo-title').value || 'Preview';
+      const previewWindow = window.open('', 'preview', 'width=1200,height=800');
+      previewWindow.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${title}</title><link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="/css/style.css"></noscript><script defer src="/js/product-cards.js"><\/script><script defer src="/js/blog-cards.js"><\/script></head><body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${html}<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-embed*="product"]').forEach(function(el, i) {
+    if (typeof ProductCards !== 'undefined') {
+      var cid = 'pc-preview-' + i;
+      el.id = cid;
+      var config = {limit:6,columns:3,filter:'all',layout:'grid'};
+      try { config = Object.assign(config, JSON.parse(el.getAttribute('data-embed'))); } catch(e) {}
+      if (config.layout === 'slider') {
+        ProductCards.renderSlider ? ProductCards.renderSlider(cid, config) : ProductCards.render(cid, config);
+      } else {
+        ProductCards.render(cid, config);
+      }
+    }
+  });
+  document.querySelectorAll('[data-embed*="blog"]').forEach(function(el, i) {
+    if (typeof BlogCards !== 'undefined') {
+      var cid = 'bc-preview-' + i;
+      el.id = cid;
+      var config = {limit:6,columns:3,layout:'grid'};
+      try { config = Object.assign(config, JSON.parse(el.getAttribute('data-embed'))); } catch(e) {}
+      if (config.layout === 'slider') {
+        BlogCards.renderSlider ? BlogCards.renderSlider(cid, config) : BlogCards.render(cid, config);
+      } else {
+        BlogCards.render(cid, {limit:config.limit,columns:config.columns,showPagination:false});
+      }
+    }
+  });
+});
+<\/script></body></html>`);
+      previewWindow.document.close();
+    });
+
+    // Load
+    document.getElementById('load-btn').addEventListener('click', async () => {
+      const name = prompt('Enter page slug to load:');
+      if (!name) return;
+      loadExistingPage(name);
+    });
+
+    async function loadExistingPage(name) {
+      try {
+        const res = await fetch(`/api/pages/load?name=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        
+        if (data.content) {
+          editingPageId = data.id ? Number(data.id) : null;
+          originalPageSlug = (data.slug || name || '').toString().trim();
+          previousEditableSlug = originalPageSlug && originalPageSlug !== 'home' ? originalPageSlug : '';
+
+          const canvas = document.getElementById('builder-canvas');
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data.content, 'text/html');
+          
+          const titleEl = doc.querySelector('title');
+          if (titleEl) document.getElementById('seo-title').value = titleEl.textContent;
+          
+          const metaDesc = doc.querySelector('meta[name="description"]');
+          if (metaDesc) document.getElementById('seo-desc').value = metaDesc.getAttribute('content') || '';
+          
+          if (data.page_type) setPageType(data.page_type);
+          document.getElementById('is-default').checked = data.is_default === 1;
+          document.getElementById('seo-slug').value = (data.page_type === 'home' && data.is_default === 1) ? '/' : (data.slug || name);
+          syncSlugField();
+
+          // Load feature image
+          const featureImageUrl = data.feature_image_url || '';
+          document.getElementById('feature_image_url').value = featureImageUrl;
+          if (featureImageUrl) {
+            const preview = document.getElementById('feature-preview');
+            preview.innerHTML = `<img src="${featureImageUrl}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none';">`;
+            preview.style.display = 'block';
+          }
+          
+          const body = doc.body;
+          canvas.innerHTML = '';
+          
+          if (body) {
+            Array.from(body.children).forEach(child => {
+              if (child.tagName === 'SCRIPT' || child.tagName === 'STYLE') return;
+              const wrapper = createSectionWrapper();
+              // If the saved element contains our section marker, unwrap its contents
+              let sectionHtml;
+              if (child.getAttribute && child.getAttribute('data-section') === 'true') {
+                sectionHtml = child.innerHTML;
+              } else {
+                sectionHtml = child.outerHTML;
+              }
+              wrapper.innerHTML = sectionHtml + createControls();
+              canvas.appendChild(wrapper);
+              enableEditing(wrapper);
+            });
+          }
+          
+          updateCanvasEmptyState();
+          alert('✅ Page loaded!');
+        } else { alert('Page not found or empty'); }
+      } catch (err) { alert('❌ Error: ' + err.message); }
+    }
+
+    document.getElementById('code-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeCodeModal();
+    });
+  </script>
+</body>
+</html>

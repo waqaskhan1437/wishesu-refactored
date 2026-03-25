@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <title>prankwish.com - Personalized Video Greetings</title>
+  <meta name="description" content="Order personalized video greetings from your favorite celebrities and creators. Unique gifts for birthdays, holidays, and special occasions.">
+  <link rel="canonical" href="https://prankwish.com/">
+  <meta property="og:url" content="https://prankwish.com/">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Structured Data for Product Collection -->
+  <!-- Removed empty JSON-LD placeholder. The collection schema is now injected server-side. -->
+</head>
+
+<body>
+  <!-- Load global components asynchronously -->
+  <script defer src="js/global-components.js"></script>
+  <main>
+    <h1>Products</h1>
+    <div id="product-list"></div>
+  </main>
+  <!-- Load the reusable product cards component before products.js so that
+       ProductCards is available for rendering the homepage grid. -->
+  <!-- Schema now injected server-side - removed collection-schema.js -->
+  <script defer src="js/product-cards.js"></script>
+  <script defer src="js/products.js"></script>
+  <!-- Load chat widget after parsing the document to avoid blocking render -->
+  <script defer src="js/chat-widget.js"></script>
+
+</body>
+
+</html>

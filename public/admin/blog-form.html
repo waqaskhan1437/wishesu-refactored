@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Editor - Admin</title>
+  <link rel="stylesheet" href="/css/admin-nav.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 1.5rem; }
+    .header-actions { display: flex; gap: 10px; }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+    }
+    
+    .main-content { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #f9fafb;
+      padding: 15px 20px;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .card-body { padding: 20px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-secondary { background: #6b7280; color: white; }
+    .btn-secondary:hover { background: #4b5563; }
+    
+    /* Rich Text Editor */
+    .editor-container {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .editor-toolbar {
+      background: #f9fafb;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .editor-toolbar button {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .editor-toolbar button:hover { background: #e5e7eb; }
+    .editor-toolbar button.active { background: #667eea; color: white; border-color: #667eea; }
+    .editor-toolbar .separator {
+      width: 1px;
+      background: #e5e7eb;
+      margin: 0 5px;
+    }
+    
+    #editor {
+      min-height: 400px;
+      padding: 20px;
+      outline: none;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    #editor:focus { background: #fefefe; }
+    
+    #editor img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
+    #editor pre {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      margin: 15px 0;
+    }
+    #editor code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.9em;
+    }
+    #editor pre code { background: none; padding: 0; }
+    #editor blockquote {
+      border-left: 4px solid #667eea;
+      margin: 15px 0;
+      padding: 10px 20px;
+      background: #f9fafb;
+      font-style: italic;
+    }
+    #editor h1, #editor h2, #editor h3, #editor h4 { margin: 20px 0 10px; color: #1f2937; }
+    #editor ul, #editor ol { margin: 10px 0; padding-left: 25px; }
+    #editor a { color: #667eea; }
+    
+    /* Code Editor Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px;
+      background: #1f2937;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body { flex: 1; overflow: auto; }
+    .modal-footer {
+      padding: 15px 20px;
+      background: #f9fafb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .code-tabs {
+      display: flex;
+      background: #374151;
+    }
+    .code-tab {
+      padding: 12px 20px;
+      color: #9ca3af;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-weight: 600;
+    }
+    .code-tab.active { color: white; background: #1f2937; }
+    
+    .code-panel { display: none; height: 400px; }
+    .code-panel.active { display: block; }
+    .code-panel textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 20px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      resize: none;
+      background: #1f2937;
+      color: #e5e7eb;
+    }
+    .code-panel textarea:focus { outline: none; }
+    
+    /* Image Upload */
+    .image-upload-area {
+      border: 2px dashed #e5e7eb;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .image-upload-area:hover { border-color: #667eea; background: #f9fafb; }
+    .image-upload-area.has-image { padding: 0; border-style: solid; }
+    .image-upload-area img { width: 100%; border-radius: 6px; }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .header { padding: 15px; flex-direction: column; gap: 15px; }
+      .editor-toolbar { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 id="page-title">New Blog Post</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="window.location.href='/admin/dashboard.html'">← Back to Dashboard</button>
+      <button class="btn btn-primary" onclick="saveBlog('draft')">💾 Save Draft</button>
+      <button class="btn btn-success" onclick="saveBlog('published')">🚀 Publish</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="main-content">
+      <!-- Title -->
+      <div class="card">
+        <div class="card-body">
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="text" id="blog-title" placeholder="Enter blog title..." style="font-size:1.5rem;font-weight:600;border:none;padding:0;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Editor -->
+      <div class="card">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Content</span>
+          <button class="btn btn-secondary" style="padding:8px 15px;font-size:0.9rem;" onclick="openCodeModal()">
+            &lt;/&gt; Edit HTML/CSS/JS
+          </button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="editor-container">
+            <div class="editor-toolbar">
+              <button onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
+              <button onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
+              <button onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
+              <button onclick="formatDoc('strikeThrough')" title="Strike">S̶</button>
+              <div class="separator"></div>
+              <button onclick="formatDoc('formatBlock', 'h1')" title="Heading 1">H1</button>
+              <button onclick="formatDoc('formatBlock', 'h2')" title="Heading 2">H2</button>
+              <button onclick="formatDoc('formatBlock', 'h3')" title="Heading 3">H3</button>
+              <button onclick="formatDoc('formatBlock', 'p')" title="Paragraph">P</button>
+              <div class="separator"></div>
+              <button onclick="formatDoc('insertUnorderedList')" title="Bullet List">• List</button>
+              <button onclick="formatDoc('insertOrderedList')" title="Numbered List">1. List</button>
+              <button onclick="formatDoc('formatBlock', 'blockquote')" title="Quote">❝ Quote</button>
+              <div class="separator"></div>
+              <button onclick="insertLink()" title="Link">🔗 Link</button>
+              <button onclick="insertImage()" title="Image">🖼️ Image</button>
+              <button onclick="insertCodeBlock()" title="Code Block">&lt;/&gt; Code</button>
+              <div class="separator"></div>
+              <button onclick="formatDoc('justifyLeft')" title="Align Left">⬅</button>
+              <button onclick="formatDoc('justifyCenter')" title="Align Center">⬌</button>
+              <button onclick="formatDoc('justifyRight')" title="Align Right">➡</button>
+              <div class="separator"></div>
+              <button onclick="formatDoc('removeFormat')" title="Clear Formatting">✖</button>
+            </div>
+            <div id="editor" contenteditable="true">
+              <p>Start writing your blog post here...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="card">
+        <div class="card-header">Short Description</div>
+        <div class="card-body">
+          <textarea id="blog-description" rows="3" placeholder="Brief description for archive page..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <!-- Featured Image -->
+      <div class="card">
+        <div class="card-header">Featured Image</div>
+        <div class="card-body">
+          <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('image-file').click()">
+            <div id="image-placeholder">
+              <div style="font-size:3rem;color:#9ca3af;">🖼️</div>
+              <p style="color:#6b7280;margin-top:10px;">Click to upload or drag & drop</p>
+            </div>
+          </div>
+          <input type="file" id="image-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this)">
+          <div class="form-group" style="margin-top:15px;">
+            <label>Or paste image URL</label>
+            <input type="text" id="blog-thumbnail" placeholder="https://..." onchange="updateImagePreview(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Slug -->
+      <div class="card">
+        <div class="card-header">URL Slug</div>
+        <div class="card-body">
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="text" id="blog-slug" placeholder="auto-generated-from-title">
+            <small style="color:#6b7280;">Leave empty to auto-generate</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO -->
+      <div class="card">
+        <div class="card-header">SEO Settings</div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>SEO Title</label>
+            <input type="text" id="seo-title" placeholder="SEO optimized title">
+          </div>
+          <div class="form-group">
+            <label>SEO Description</label>
+            <textarea id="seo-description" rows="3" placeholder="Meta description for search engines"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Keywords</label>
+            <input type="text" id="seo-keywords" placeholder="keyword1, keyword2, keyword3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Editor Modal -->
+  <div class="modal-overlay" id="code-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Code Editor</h3>
+        <button onclick="closeCodeModal()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">×</button>
+      </div>
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCodeTab('html')">HTML</button>
+        <button class="code-tab" onclick="switchCodeTab('css')">CSS</button>
+        <button class="code-tab" onclick="switchCodeTab('js')">JavaScript</button>
+      </div>
+      <div class="modal-body">
+        <div class="code-panel active" id="panel-html">
+          <textarea id="code-html" placeholder="Enter HTML content..."></textarea>
+        </div>
+        <div class="code-panel" id="panel-css">
+          <textarea id="code-css" placeholder="Enter custom CSS..."></textarea>
+        </div>
+        <div class="code-panel" id="panel-js">
+          <textarea id="code-js" placeholder="Enter custom JavaScript..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCodeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyCodeChanges()">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let blogId = null;
+    let customCSS = '';
+    let customJS = '';
+
+    // Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('id')) {
+      blogId = urlParams.get('id');
+      loadBlog(blogId);
+    }
+
+    // Load existing blog
+    async function loadBlog(id) {
+      try {
+        const res = await fetch(`/api/blog/${id}`);
+        const data = await res.json();
+        
+        if (data.blog) {
+          const b = data.blog;
+          document.getElementById('page-title').textContent = 'Edit Blog Post';
+          document.getElementById('blog-title').value = b.title || '';
+          document.getElementById('blog-slug').value = b.slug || '';
+          document.getElementById('blog-description').value = b.description || '';
+          document.getElementById('editor').innerHTML = b.content || '<p>Start writing...</p>';
+          document.getElementById('blog-thumbnail').value = b.thumbnail_url || '';
+          document.getElementById('seo-title').value = b.seo_title || '';
+          document.getElementById('seo-description').value = b.seo_description || '';
+          document.getElementById('seo-keywords').value = b.seo_keywords || '';
+          
+          customCSS = b.custom_css || '';
+          customJS = b.custom_js || '';
+          
+          if (b.thumbnail_url) {
+            updateImagePreview(b.thumbnail_url);
+          }
+        }
+      } catch (err) {
+        console.error('Load error:', err);
+        alert('Error loading blog post');
+      }
+    }
+
+    // Save blog
+    async function saveBlog(status) {
+      const title = document.getElementById('blog-title').value.trim();
+      if (!title) {
+        alert('Please enter a title');
+        return;
+      }
+
+      const data = {
+        id: blogId,
+        title: title,
+        slug: document.getElementById('blog-slug').value.trim(),
+        description: document.getElementById('blog-description').value.trim(),
+        content: document.getElementById('editor').innerHTML,
+        thumbnail_url: document.getElementById('blog-thumbnail').value.trim(),
+        custom_css: customCSS,
+        custom_js: customJS,
+        seo_title: document.getElementById('seo-title').value.trim(),
+        seo_description: document.getElementById('seo-description').value.trim(),
+        seo_keywords: document.getElementById('seo-keywords').value.trim(),
+        status: status
+      };
+
+      try {
+        const res = await fetch('/api/blog/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          alert(status === 'published' ? 'Blog published!' : 'Draft saved!');
+          if (!blogId) {
+            window.location.href = `/admin/blog-form.html?id=${result.id}`;
+          }
+        } else {
+          alert('Error: ' + (result.error || 'Save failed'));
+        }
+      } catch (err) {
+        console.error('Save error:', err);
+        alert('Error saving blog');
+      }
+    }
+
+    // Rich text editor commands
+    function formatDoc(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+      document.getElementById('editor').focus();
+    }
+
+    function insertLink() {
+      const url = prompt('Enter URL:');
+      if (url) {
+        formatDoc('createLink', url);
+      }
+    }
+
+    function insertImage() {
+      const url = prompt('Enter image URL:');
+      if (url) {
+        formatDoc('insertImage', url);
+      }
+    }
+
+    function insertCodeBlock() {
+      const code = prompt('Enter code:');
+      if (code) {
+        const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        formatDoc('insertHTML', `<pre><code>${escaped}</code></pre><p></p>`);
+      }
+    }
+
+    // Code modal
+    function openCodeModal() {
+      document.getElementById('code-html').value = document.getElementById('editor').innerHTML;
+      document.getElementById('code-css').value = customCSS;
+      document.getElementById('code-js').value = customJS;
+      document.getElementById('code-modal').classList.add('active');
+    }
+
+    function closeCodeModal() {
+      document.getElementById('code-modal').classList.remove('active');
+    }
+
+    function switchCodeTab(tab) {
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector(`[onclick="switchCodeTab('${tab}')"]`).classList.add('active');
+      document.getElementById(`panel-${tab}`).classList.add('active');
+    }
+
+    function applyCodeChanges() {
+      document.getElementById('editor').innerHTML = document.getElementById('code-html').value;
+      customCSS = document.getElementById('code-css').value;
+      customJS = document.getElementById('code-js').value;
+      closeCodeModal();
+    }
+
+    // Image upload
+    /*
+      IMPORTANT:
+      Previously we embedded the full image as a base64 data URL inside the blog
+      JSON payload (thumbnail_url). Large images can exceed Cloudflare Worker
+      request size limits, which makes Save/Publish appear to "do nothing".
+
+      Fix: upload the image to R2 via /api/upload/temp-file and store the
+      resulting URL in the thumbnail field.
+    */
+    function handleImageUpload(input) {
+      if (!(input && input.files && input.files[0])) return;
+
+      const file = input.files[0];
+      if (!file.type || !file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
+        return;
+      }
+
+      const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file.size > MAX_SIZE) {
+        alert(`Image too large: ${(file.size / 1024 / 1024).toFixed(2)}MB.\nMaximum allowed size is 10MB.`);
+        input.value = '';
+        return;
+      }
+
+      // Use "admin-" prefix (backend whitelist) to avoid Turnstile on admin uploads.
+      const sessionId = 'admin-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const uploadUrl = `/api/upload/temp-file?sessionId=${encodeURIComponent(sessionId)}&filename=${encodeURIComponent(safeName)}`;
+
+      fetch(uploadUrl, {
+        method: 'POST',
+        body: file,
+        headers: { 'Content-Type': file.type || 'application/octet-stream' }
+      }).then(async (res) => {
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error('Failed to parse upload response');
+        }
+        if (!res.ok || !data || !data.success) {
+          throw new Error((data && data.error) ? data.error : `Upload failed (${res.status})`);
+        }
+
+        const key = (data.tempUrl || '').replace('r2://', '');
+        const finalUrl = `/api/r2/file?key=${encodeURIComponent(key)}`;
+        updateImagePreview(finalUrl);
+        document.getElementById('blog-thumbnail').value = finalUrl;
+      }).catch((err) => {
+        console.error('Image upload failed:', err);
+        alert('Image upload failed: ' + (err?.message || 'Unknown error'));
+      });
+    }
+
+    function updateImagePreview(url) {
+      const area = document.getElementById('image-upload-area');
+      if (url) {
+        area.innerHTML = `<img src="${url}" alt="Featured image">`;
+        area.classList.add('has-image');
+      } else {
+        area.innerHTML = document.getElementById('image-placeholder').outerHTML;
+        area.classList.remove('has-image');
+      }
+    }
+
+    // Drag and drop for images
+    const uploadArea = document.getElementById('image-upload-area');
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#667eea';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#e5e7eb';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#e5e7eb';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        document.getElementById('image-file').files = e.dataTransfer.files;
+        handleImageUpload(document.getElementById('image-file'));
+      }
+    });
+
+    // Auto-generate slug from title
+    document.getElementById('blog-title').addEventListener('blur', function() {
+      const slugInput = document.getElementById('blog-slug');
+      if (!slugInput.value && this.value) {
+        slugInput.value = this.value.toLowerCase()
+          .replace(/['"`]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .replace(/-+/g, '-');
+      }
+    });
+
+    // Close modal on overlay click
+    document.getElementById('code-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeCodeModal();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+          case 's':
+            e.preventDefault();
+            saveBlog('draft');
+            break;
+          case 'Enter':
+            e.preventDefault();
+            saveBlog('published');
+            break;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
